@@ -1,0 +1,32 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FaUserCircle } from "react-icons/fa";
+import { useAuthStore } from "../store/authStore";
+import { urlPathName } from "../utils/urlPathFromName";
+const UserListElement = ({ user }) => {
+  const navigate = useNavigate();
+  const { user: authUser } = useAuthStore();
+  const fullName = urlPathName(user);
+  return (
+    <div
+      className="flex hoverGray w-full  rounded-lg cursor-pointer p-2 items-center gap-4"
+      onClick={() =>
+        user._id === authUser._id
+          ? navigate("/profile")
+          : navigate(`/users/${fullName}`)
+      }
+    >
+      {user.profilePicture ? (
+        <img src={user.profilePicture} className="size-12 rounded-full" />
+      ) : (
+        <FaUserCircle className="size-12" />
+      )}
+      <h1>
+        {user._id === authUser._id ? "You" : user.firstName}{" "}
+        {user._id === authUser._id ? "" : user.accountType === "normal" ? user.lastName : user.name}
+      </h1>
+    </div>
+  );
+};
+
+export default UserListElement;
