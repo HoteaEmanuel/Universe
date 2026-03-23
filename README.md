@@ -17,7 +17,7 @@ This repository contains:
 
 ---
 
-## Features (Demo)
+## Features
 
 - Student-style social feed (posts, likes, comments, follows)
 - User authentication with valid academic email
