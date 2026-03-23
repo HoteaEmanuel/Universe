@@ -39,6 +39,8 @@ const MultipleImagesUploader = ({ setFiles, files,classes, children }) => {
   const handleRemoveImage = (image) => {
     setFiles((prev) => prev.filter((file) => file !== image));
   };
+
+  console.log("FILES HERE: ",files);
   return (
     <div className={`violet uploader p-4 rounded-xl ${classes}`}>
       <div
@@ -65,7 +67,7 @@ const MultipleImagesUploader = ({ setFiles, files,classes, children }) => {
       <ul className="flex justify-center">
         {files &&
           files.map((file) => {
-            const preview = file.path ? URL.createObjectURL(file) : file;
+            const preview = file?.path ? URL.createObjectURL(file) : file;
             return (
               <li key={file?.name}>
                 <div className="relative">

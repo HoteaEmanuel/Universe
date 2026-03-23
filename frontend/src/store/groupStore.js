@@ -56,6 +56,7 @@ export const useGroupStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await axios.get(`${API_URL}/groups/${id}/messages`);
+      console.log("RESPONSE");
       console.log(response);
       return response.data.groupMessages;
     } catch (error) {

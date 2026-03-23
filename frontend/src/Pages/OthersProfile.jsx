@@ -15,13 +15,10 @@ import {
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
 import { useGetConversationByUsersIdsQuery } from "../queryAndMutation/queries/conversation-queries.js";
-import FollowersModal from "../Modals/FollowersModal.jsx";
-import FollowingModal from "../Modals/FollowingModal.jsx";
-import { FaUserEdit } from "react-icons/fa";
-import { PiStudentFill } from "react-icons/pi";
-import { FaUniversity } from "react-icons/fa";
 import { useEffect } from "react";
 import Profile from "../components/Profile.jsx";
+
+
 const OthersProfile = () => {
   useEffect(() => {
     document.title = "User Profile";
@@ -41,13 +38,11 @@ const OthersProfile = () => {
   console.log(user?._id, loggedUser._id);
   const followMutation = useFollowMutation(user?._id, loggedUser._id);
   const unfollowMutation = useUnfollowMutation(user?._id, loggedUser._id);
+
   if (isPendingPosts) return <p>Loading the followers...</p>;
-  // if (isPendingFollowing) return <p>Loading the following...</p>;
   if (isPendingCheckFollowing || isPendingConversation || isPendingUser) {
     return <p>Loading...</p>;
   }
-  console.log(conversation);
-  console.log(user);
   return (
     <section className="flex flex-col w-full h-full overflow-y-auto">
       <div className="w-full h-1/3 md:h-auto shadow p-10 flex-col justify-center items-center">

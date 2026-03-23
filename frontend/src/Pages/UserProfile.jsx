@@ -87,7 +87,7 @@ const UserProfile = () => {
           (option === "saved" && savedPosts.length === 0 && (
             <p>No saved posts yet</p>
           ))}
-        {posts.length === 0 && (
+        {posts.length === 0 && option==="posts" && (
           <div className="w-full flex flex-col gap-5 justify-center h-full items-center">
             <h1 className="italic">Empty space - give it some love</h1>
             <button

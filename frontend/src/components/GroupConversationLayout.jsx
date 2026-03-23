@@ -19,12 +19,12 @@ const GroupConversationLayout = ({ group, messages }) => {
   // const { messages, getLiveMessages, getMessages } = useConversationStore();
   const messageEnd = useRef(null);
   const navigate = useNavigate();
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState(null);
+  const [imageToFull, setImageToFull] = useState(null);
   const [open, setOpen] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
-
+  const [openAddedImages, setOpenAddedImages] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
-
   useEffect(() => {
     if (messageEnd.current && messages) {
       messageEnd.current.scrollIntoView({ behavior: "smooth" });
@@ -64,20 +64,28 @@ const GroupConversationLayout = ({ group, messages }) => {
                       : "chat-start"
                   } max-w-1/2`}
                 >
-                  {message.imagePublicId && (
-                    <>
-                      <img
-                        className="max-h-2/3 max-w-2/3 md:max-w-sm "
-                        src={`https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${message.imagePublicId}`}
-                        onClick={() => setOpen(true)}
-                      />
-                      <FullImageModal
-                        image={message.imagePublicId}
-                        open={open}
-                        onClose={() => setOpen(false)}
-                      />
-                    </>
+                  {message?.imageUrls?.length > 0 && (
+                    <ul className="flex flex-col gap-4">
+                      {message.imageUrls.map((image) => (
+                        <li key={image}>
+                          <img
+                            className="max-h-2/3 max-w-2/3 md:max-w-sm"
+                            src={image}
+                            onClick={() => {
+                              setImageToFull(image);
+                              setOpen(true);
+                            }}
+                          />
+                        </li>
+                      ))}
+                    </ul>
                   )}
+                  <FullImageModal
+                    image={imageToFull}
+                    open={open}
+                    onClose={() => setOpen(false)}
+                  />
+
                   <div>
                     <div className="flex  gap-2 justify-end">
                       {user._id !== message.senderId._id &&
@@ -180,22 +188,65 @@ const GroupConversationLayout = ({ group, messages }) => {
         />
       )}
 
-      {image && (
-        <div className="relative">
-          <img
-            src={cancel}
-            className="absolute size-5 text-red-500 -top-22 left-20 z-10 cursor-pointer"
-            onClick={() => setImage(null)}
-          />
-          <img
-            src={URL.createObjectURL(image)}
-            alt="selected image"
-            className="absolute size-20 -top-20 left-1"
-          />
-        </div>
+      {images && (
+        <ul className="container">
+          {images.map((image) => {
+            <li className="relative">
+              <img
+                src={cancel}
+                className="absolute size-5 text-red-500 -top-22 left-20 z-10 cursor-pointer"
+                onClick={() =>
+                  setImages(() => images.filter((item) => item.path !== image))
+                }
+              />
+              <img
+                src={URL.createObjectURL(image)}
+                alt="selected image"
+                className="absolute size-20 -top-20 left-1"
+              />
+            </li>;
+          })}
+        </ul>
+      )}
+
+      {images?.length > 0 && (
+        <ul className="w-full flex">
+          {images.map((image) => (
+            <li className="relative w-10" key={image.path}>
+              <img
+                src={cancel}
+                className="absolute size-5 text-red-500 -top-10 -right-3 z-10 cursor-pointer"
+                onClick={() =>
+                  setImages((prev) => prev.filter((img) => img !== images[0]))
+                }
+              />
+              <img
+                src={URL.createObjectURL(image)}
+                alt="selected image"
+                className="absolute size-10 -top-10 left-1"
+                onClick={() => {
+                  setImageToFull(image);
+                  setOpenAddedImages(true);
+                }}
+              />
+              <FullImageModal
+                image={imageToFull}
+                open={openAddedImages}
+                onClose={() => {
+                  setOpenAddedImages(false);
+                  setImageToFull(null);
+                }}
+              />
+            </li>
+          ))}
+        </ul>
       )}
       <div className="fixed bottom-20 sm:bottom-0 w-[90vw] md:w-[70vw]">
-        <MessageInput image={image} setImage={setImage} messageType="group" />
+        <MessageInput
+          images={images}
+          setImages={setImages}
+          messageType="group"
+        />
       </div>
     </div>
   );

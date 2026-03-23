@@ -1,4 +1,5 @@
 export const universityEmailDomains = [
+  "lucaciu.ro",
   "gmail.com",
   "unibuc.ro",
   "ubbcluj.ro",

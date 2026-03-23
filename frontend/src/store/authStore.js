@@ -36,6 +36,8 @@ export const useAuthStore = create((set, get) => ({
       });
       set({ user: response.data.user });
     } catch (eroare) {
+      console.log("EROARE LA SIGN UP");
+      console.log(eroare);
       set({ error: eroare?.response?.data?.message || "Sign up failed" });
       throw eroare;
     } finally {
@@ -130,6 +132,7 @@ export const useAuthStore = create((set, get) => ({
   resetPassword: async (token, password) => {
     set({ isLoading: true, error: null });
     try {
+      console.log(token,password);
       await axios.post(`${API_URL}/auth/reset-password/${token}`, { password });
     } catch (eroare) {
       set({ error: eroare.response.data.message || "Request failed" });

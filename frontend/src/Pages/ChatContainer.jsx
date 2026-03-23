@@ -68,7 +68,7 @@ const ChatContainer = () => {
   console.log(onlineUsers);
 
   return (
-    <div className="w-full flex  flex-col justify-center p-10">
+    <section className="w-full flex  flex-col justify-center p-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl py-5">Your conversations</h1>
         <BiMessageSquareAdd
@@ -155,7 +155,7 @@ const ChatContainer = () => {
           <p className="text-center text-lg">No conversatios yet</p>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 

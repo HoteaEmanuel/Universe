@@ -8,7 +8,7 @@ import { MdDarkMode, MdLightMode } from "react-icons/md";
 const TopBar = () => {
   const { user } = useAuthStore();
   return (
-    <div className=" md:hidden  flex justify-between items-center shadow-md p-2">
+    <section className=" md:hidden  flex justify-between items-center shadow-md p-2">
       <div className="w-1/2 flex items-center md:w-1/3 gap-0">
         {" "}
         <Link to={"/home"}>
@@ -35,7 +35,7 @@ const TopBar = () => {
           <CiLogout className="h-8 w-10 text-violet-950 font-bold m-2 float-right" />
         </Link> */}
       </div>
-    </div>
+    </section>
   );
 };
 

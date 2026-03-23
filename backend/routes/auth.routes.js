@@ -1,13 +1,13 @@
 import express from "express";
 import passport from "passport";
 import {
-  signUp,
-  verifyEmail,
+  signUpController,
+  verifyEmailController,
   logout,
-  forgotPassword,
-  resetPassword,
+  forgotPasswordController,
+  resetPasswordController,
   checkAuth,
-  sendVerificationEmail,
+  sendVerificationEmailController,
   businessRegistrations,
   acceptBusinessRegistration,
   rejectBusinessRegistration,
@@ -39,9 +39,9 @@ router.get(
 );
 
 router.post("/reject-business-registrations/:id", rejectBusinessRegistration);
-router.post("/signup", signUp);
-router.post("/verify-email", verifyEmail);
-router.post("/resend-verify-email", sendVerificationEmail);
+router.post("/signup", signUpController);
+router.post("/verify-email", verifyEmailController);
+router.post("/resend-verify-email", sendVerificationEmailController);
 router.post("/login", loginWeb);
 router.post("/login/mobile", loginMobile);
 
@@ -64,10 +64,11 @@ router.get("/google/mobile-init", (req, res) => {
 });
 
 router.get("/google/mobile-callback", authWithGoogleMobile);
+router.post("/reset-password/:token", resetPasswordController);
 router.post("/logout", logout);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", resetPassword);
-router.use(verifyToken);
+router.post("/forgot-password", forgotPasswordController);
+
+// router.use(verifyToken);
 router.get("/business-account-registrations", businessRegistrations);
 router.post("/accept-business-registrations/:id", acceptBusinessRegistration);
 export default router;

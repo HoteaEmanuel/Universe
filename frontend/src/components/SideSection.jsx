@@ -3,11 +3,14 @@ import { useAuthStore } from "../store/authStore";
 import { NavLink } from "react-router-dom";
 import { SideLinks } from "./SideTabLinks";
 import { RiAdminFill } from "react-icons/ri";
+import { FaUserCircle } from "react-icons/fa";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import logo from "../assets/logo_1.png";
 import { useGetUnreadNotifications } from "../queryAndMutation/queries/notifications-queries";
 import { useGlobalStore } from "../store/globalStore";
+
+
 const SideSection = () => {
   const pathname = useLocation();
   const { notificationsOn } = useGlobalStore();
@@ -27,7 +30,6 @@ const SideSection = () => {
   );
   if (isPending) return <h1>Loading...</h1>;
 
-  console.log("NOTIFICATION IN SIDESECTION: ", notifications);
 
   return (
     <aside className="sideTab flex flex-col items-center justify-center w-1/4 h-screen hidden md:block shadow overflow-hidden">
@@ -37,7 +39,6 @@ const SideSection = () => {
           Universe
         </h1>
       </div>
-      {/* <ProfileCard user={user} /> */}
       <ul className="w-full flex flex-col justify-center items-center gap-2 mt-5 mb-5 h-2/3">
         {SideLinks.map((item) => {
           const isActive = pathname.pathname === item.link;

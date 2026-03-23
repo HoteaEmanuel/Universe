@@ -23,7 +23,7 @@ export const sendEmail = async (email, verificationCode) => {
       subject: "Verify your email",
       html: VERIFICATION_EMAIL.replace(
         "{{VERIFICATION_CODE}}",
-        verificationCode
+        verificationCode,
       ),
     });
   } catch (error) {
@@ -35,7 +35,7 @@ export const sendWelcomeEmail = async (user) => {
     transporter.sendMail({
       to: user.email,
       subject: "Welcome to Universe",
-      html: WELCOME_EMAIL.replace("{{USER_NAME}}", user.firstName)
+      html: WELCOME_EMAIL.replace("{{USER_NAME}}", user.name)
         .replaceAll("{{APP_NAME}}", "Universe")
         .replace("{{APP_URL}}", `${process.env.CLIENT_URL}/login`),
     });
@@ -43,12 +43,12 @@ export const sendWelcomeEmail = async (user) => {
     console.log("Email was not sent:( ");
   }
 };
-export const sendPasswordResetEmail = async (email, resetToken) => {
-  const encodedToken = encodeURIComponent(resetToken);
+export const sendPasswordResetEmail = async (data) => {
+  const encodedToken = encodeURIComponent(data.token);
   const url = `${process.env.CLIENT_URL}/reset-password/${encodedToken}`;
   try {
     transporter.sendMail({
-      to: email,
+      to: data.email,
       subject: "Reset password",
       html: RESET_PASSWORD_EMAIL.replace("{{URL}}", url),
     });

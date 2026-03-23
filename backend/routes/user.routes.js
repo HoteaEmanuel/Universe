@@ -1,10 +1,9 @@
 import express from "express";
 import {
   updateUserImage,
-  savePost,
   unsavePost,
-  follow,
-  unfollow,
+  followController,
+  unfollowController,
   getUserById,
   followsUser,
   getFollowers,
@@ -13,6 +12,7 @@ import {
   getUsersFromSameUniversity,
   updateBio,
   getUserByName,
+  savePostController,
 } from "../controllers/user.controller.js";
 import multer from "multer";
 const router = express.Router();
@@ -27,9 +27,9 @@ router.patch("/update-bio", updateBio);
 router.get("/follows-user/:id", followsUser);
 router.get("/users-from-same-university", getUsersFromSameUniversity);
 router.put("/update-profile-image", upload.single("image"), updateUserImage);
-router.post("/posts/save/:id", savePost);
+router.post("/posts/save/:id", savePostController);
 router.post("/posts/unsave/:id", unsavePost);
-router.post("/follow", follow);
-router.post("/unfollow", unfollow);
+router.post("/follow", followController);
+router.post("/unfollow", unfollowController);
 
 export default router;

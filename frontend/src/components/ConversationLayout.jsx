@@ -6,7 +6,6 @@ import { useState } from "react";
 import cancel from "../assets/cancel.svg";
 import FullImageModal from "../Modals/FullImageModal";
 import MessageOptionsModal from "../Modals/MessageOptionsModal";
-const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const ConversationLayout = ({ messages }) => {
   const { user } = useAuthStore();
 
@@ -24,8 +23,6 @@ const ConversationLayout = ({ messages }) => {
       messageEnd.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-  console.log("IMAGE TO FULL", imageToFull);
-  console.log("MESSAGES: ", messages);
   return (
     <div className=" max-h-[85%] md:h-screen relative p-1  overflow-x-hidden">
       <div className="w-full h-[80vh] md:h-[75vh] overflow-y-auto rounded-2xl p-2 my-1 conversationContainer">
@@ -51,13 +48,13 @@ const ConversationLayout = ({ messages }) => {
                     user._id === message.senderId ? "chat-end" : "chat-start"
                   }`}
                 >
-                  {message?.deleted === false && message.images?.length > 0 && (
+                  {message?.deleted === false && message.imageUrls?.length > 0 && (
                     <ul>
-                      {message.images.map((image, index) => (
+                      {message.imageUrls.map((image, index) => (
                         <li key={index} className="flex justify-start py-1">
                           <img
-                            className="max-h-2/3 max-w-2/3 md:max-w-sm "
-                            src={`https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${image.publicId}`}
+                            className="max-h-2/3 max-w-2/3 md:max-w-xs "
+                            src={image}
                             onClick={() => {
                               setImageToFull(image);
                               setOpen(true);
@@ -133,7 +130,7 @@ const ConversationLayout = ({ messages }) => {
         onClose={() => setSelectedMessage(null)}
         message={selectedMessage}
       />
-      {images.length > 0 && (
+      {images?.length > 0 && (
         <ul className="w-full flex">
           {images.map((image) => (
             <li className="relative w-10" key={image.path}>

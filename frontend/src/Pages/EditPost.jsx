@@ -39,7 +39,7 @@ const EditPost = () => {
 
   if (isPending) return <p>Loading...</p>;
   const onSubmit = async (data) => {
-    data.image = files[0];
+    data.images = files;
     data.id = id;
     if (files[0] === undefined) {
       setImageError("Add an image");
@@ -49,9 +49,10 @@ const EditPost = () => {
     navigate("/profile");
   };
   if (isPending) return <p>Fetching the post data</p>;
-  console.log("POST EDIT:", post);
+
+  console.log("POST: ",post);
   return (
-    <div className="w-full h-full ">
+    <section className="w-full h-full ">
       <form
         className="flex flex-1 flex-col justify-center gap-4 w-full p-10 md:px-20 violet"
         onSubmit={handleSubmit(onSubmit)}
@@ -97,9 +98,8 @@ const EditPost = () => {
         )}
         <input
           {...register("location", {
-            required: "Set a location",
             validate: (v) => {
-              if (v.length < 2 || v.length > 100)
+              if (v.length > 100)
                 return "The location should have between 2-100 characters";
               return true;
             },
@@ -144,7 +144,7 @@ const EditPost = () => {
           </button>
         </div>
       </form>
-    </div>
+    </section>
   );
 };
 

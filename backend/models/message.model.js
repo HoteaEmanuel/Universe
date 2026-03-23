@@ -32,13 +32,8 @@ const messageSchema = new mongoose.Schema(
       default: false,
     },
 
-    images: [
-      {
-        publicId: {
-          type: String,
-        },
-      },
-    ],
+    imageUrls: { type: [String] },
+    imagePublicIds: { type: [String] },
   },
   {
     timestamps: true,

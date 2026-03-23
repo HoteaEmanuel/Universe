@@ -17,9 +17,10 @@ const ResetPassword = () => {
     formState: { errors },
   } = useForm();
   const { token } = useParams();
-  const onSubmit = async (password) => {
+  const onSubmit = async (data) => {
+
     try {
-      const response = await resetPassword(token, password.password);
+      const response = await resetPassword(token, data.password);
       if (response instanceof Error) {
         throw response;
       }

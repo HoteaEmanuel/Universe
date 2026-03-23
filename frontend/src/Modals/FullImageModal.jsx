@@ -7,7 +7,7 @@ const FullImageModal = ({ image, open, onClose }) => {
   return (
     <div
       className={`fixed inset-0 flex w-full h-full justify-center items-center z-10 ${
-        open ? "visible bg-black/90" : "invisible"
+        open ? "visible bg-black/10" : "invisible"
       }`}
       onClick={onClose}
     >
@@ -15,7 +15,7 @@ const FullImageModal = ({ image, open, onClose }) => {
         <div className="relative">
           {" "}
           <img
-            src={image.path ? URL.createObjectURL(image) : `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${image.publicId}`}
+            src={image.path ? URL.createObjectURL(image) : image}
             alt="full-image"
             className="w-[90vw] h-[90vh] object-contain rounded-2xl"
           />

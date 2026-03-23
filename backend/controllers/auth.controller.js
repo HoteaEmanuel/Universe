@@ -11,13 +11,21 @@ import {
   sendWelcomeEmail,
 } from "../mail-service/sendMail.js";
 import { universityEmailDomains } from "../utils/universityDomain.js";
-import { emailQueue } from "../queues/emailQueue.js";
 import { generateJwtMobile } from "../utils/generateJwtMobile.js";
+
+import {
+  login,
+  verifyEmail,
+  signUp,
+  sendVerificationEmail,
+  forgotPassword,
+  resetPassword,
+} from "../services/auth.service.js";
 
 /**
  * Check if there is a user with a specific id, as parameter
- * @param {*} req 
- * @param {*} res 
+ * @param {*} req
+ * @param {*} res
  * @returns the user with the specified id
  */
 export const checkAuth = async (req, res) => {
@@ -106,188 +114,45 @@ export const rejectBusinessRegistration = async (req, res) => {
   }
 };
 
-export const signUp = async (req, res) => {
-
-  let { firstName, lastName, name, email, password, accountType, major } =
-    req.body;
-
-  console.log(firstName, lastName, name, email, password, accountType, major);
-  console.log("SIGN UP REQUEST: ", req.body);
+export const signUpController = async (req, res) => {
   try {
-    email = email.toLowerCase();
-    if (
-      RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$").test(
-        email,
-      ) === false
-    ) {
-      console.log("INVALID");
-      return res
-        .status(400)
-        .json({ succes: false, message: "Invalid email format" });
-    }
+    const user = await signUp(req.body);
 
-    const existingUser = await User.findOne({ email: email });
-    console.log(existingUser);
-
-    if (existingUser) {
-      return res.status(400).json({ message: "Registration failed!" });
-    }
-    // if (!firstName || !lastName || !email || !password || !accountType || (accountType === "normal" && !major)) {
-    //   return res
-    //     .status(400)
-    //     .json({ succes: "Failure", message: "All the field are required" });
-    // }
-    console.log("ABOVE DOMAIN");
-    const domain = email.split("@")[1];
-    console.log("DOMAIN");
-    console.log(domain);
-    const domainValid = universityEmailDomains.find(
-      (Unidomain) => Unidomain == domain,
-    );
-    if (domainValid === undefined) {
-      return res
-        .status(400)
-        .json({ succes: false, message: "Not a university email" });
-    }
-    const universityName = universityDomains[domain];
-
-    const verificationCode = generateVerificationToken();
-
-    // Generate salt and hash
-
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(password, salt);
-    let user;
-    if (accountType === "normal") {
-      user = new User({
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        university: universityName,
-        major: major || "",
-        verificationToken: verificationCode,
-        identityVerified: true,
-        accountType: accountType,
-        verificationTokenExpiresAt: Date.now() + 1000 * 60 * 15,
-      });
-    } else {
-      user = new User({
-        name,
-        email,
-        password: hashedPassword,
-        university: name,
-        verificationToken: verificationCode,
-        accountType: accountType,
-        verificationTokenExpiresAt: Date.now() + 1000 * 60 * 15,
-      });
-    }
     // Generate the JWT Token
-    generateToken(res, user._id);
-    // await sendEmail(user.email, verificationCode);
-    await emailQueue.add("sendVerificationEmail", {
-      to: user.email,
-      subject: "Verify your email",
-      body: verificationCode,
-    });
-    await user.save();
-    console.log("USER CREATED: ", user);
+    // generateToken(res, user._id);
     return res.status(201).json({ message: "User created successfully", user });
   } catch (error) {
-    res.status(400).json({ message: "Could not create user" });
+    return res.status(400).json({ message: error.message });
   }
 };
 
-export const sendVerificationEmail = async (req, res) => {
-  const data = req.body;
-  const { email } = data;
+export const sendVerificationEmailController = async (req, res) => {
+  const { email } = req.body;
   try {
-    const user = await User.findOne({ email: email });
-    if (!user)
-      return res.status(400).json({
-        message: "Something went wrong.",
-      });
-    if (user.isVerified) {
-      return res
-        .status(400)
-        .json({ message: "This email is already verified" });
-    }
-    const verificationCode = generateVerificationToken();
-    user.verificationToken = verificationCode;
-    user.verificationTokenExpiresAt = Date.now() + 1000 * 60 * 15;
-    await user.save();
-    await sendEmail(email, verificationCode);
+    await sendVerificationEmail(email);
     return res
       .status(200)
       .json({ message: "Verification email was sent successfully" });
   } catch (error) {
-    return res
-      .status(400)
-      .json({ message: "Verification email process failed" });
+    return res.status(400).json({ message: error.message });
   }
 };
 
-export const verifyEmail = async (req, res) => {
+export const verifyEmailController = async (req, res) => {
   const { verificationCode } = req.body;
+
   try {
-    const user = await User.findOne({ verificationToken: verificationCode });
-    if (!user) {
-      throw new Error("Verification code is wrong");
-    }
-    if (
-      user.verificationTokenExpiresAt &&
-      user.verificationTokenExpiresAt < Date.now()
-    ) {
-      return res.status(400).json({ message: "Verification code is expired" });
-    }
-    user.verificationToken = undefined;
-    user.verificationTokenExpiresAt = undefined;
-    user.isVerified = true;
-    await user.save();
-    await sendWelcomeEmail(user);
+    await verifyEmail(verificationCode);
     return res.status(200).json({ message: "Email verified :)" });
   } catch (error) {
-    return res
-      .status(400)
-      .json({ message: "Verification process went wrong!" });
+    return res.status(400).json({ message: error.message });
   }
-};
-
-const login = async (req, res) => {
-  console.log("LOGIN REQUEST: ", req.body);
-  const { email, password } = req.body;
-  const userExists = await User.findOne({ email: email });
-  if (
-    !userExists ||
-    !userExists.isVerified ||
-    (userExists.accountType === "business" &&
-      userExists.identityVerified === "rejected") ||
-    (userExists.accountType === "business" &&
-      userExists.identityVerified == "false")
-  ) {
-    console.log("PROBLEM");
-    throw new Error("Authentication failed");
-  }
-  const hashedPassword = userExists.get("password");
-  const passwordsMatch = await bcryptjs.compare(password, hashedPassword);
-  if (!passwordsMatch) {
-    console.log("PASSWORDS DO NOT MATCH");
-    throw new Error("Authentication failed");
-  }
-
-  userExists.lastLogin = new Date();
-  await userExists.save();
-  userExists.password = undefined;
-  userExists.resetPasswordToken = undefined;
-  userExists.resetPasswordExpiresAt = undefined;
-  userExists.verificationToken = undefined;
-  userExists.verificationTokenExpiresAt = undefined;
-  return userExists;
 };
 
 export const loginWeb = async (req, res) => {
+  console.log("LOGIN HIT IN THIS WAY");
   try {
-    const userExists = await login(req, res);
+    const userExists = await login(req.body);
     generateToken(res, userExists._id);
     return res
       .status(200)
@@ -300,7 +165,7 @@ export const loginWeb = async (req, res) => {
 
 export const loginMobile = async (req, res) => {
   try {
-    const userExists = await login(req, res);
+    const userExists = await login(req.body);
 
     // Generate the acces and refresh token and sent them
     const { accessToken, refreshToken } = await generateJwtMobile(
@@ -319,27 +184,11 @@ export const loginMobile = async (req, res) => {
   }
 };
 
-export const forgotPassword = async (req, res) => {
+export const forgotPasswordController = async (req, res) => {
   const { email } = req.body;
+  console.log("CALL?");
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: "Could not find user with provided email" });
-    }
-
-    const resetPassToken = crypto.randomBytes(20).toString("hex");
-
-    const hashedToken = await bcryptjs.hash(resetPassToken, 10);
-
-    user.resetPasswordToken = hashedToken;
-
-    user.resetPasswordExpiresAt = Date.now() + 15 * 60 * 1000;
-
-    await user.save();
-
-    await sendPasswordResetEmail(user.email, hashedToken);
+    await forgotPassword(email);
     return res
       .status(200)
       .json({ message: "Reset password email was sent with succes!" });
@@ -348,27 +197,20 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-export const resetPassword = async (req, res) => {
+export const resetPasswordController = async (req, res) => {
   const { password } = req.body;
   const { token } = req.params;
   try {
-    const decodedToken = decodeURIComponent(token);
-    const user = await User.findOne({ resetPasswordToken: decodedToken });
-    if (!user) {
-      throw new Error("Something went wrong");
-    }
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(password, salt);
-    user.password = hashedPassword;
-    await user.save();
+    await resetPassword(password, token);
     return res.status(200).json({ message: "Password changed succesfully" });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return res.status(400).json({ error: error.message });
   }
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("refreshToken");
+  res.clearCookie("accessToken");
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 

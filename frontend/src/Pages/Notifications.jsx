@@ -10,8 +10,7 @@ import { formatDateDetailed } from "../utils/formatDate";
 const Notifications = () => {
   const navigate = useNavigate();
   const { user, socket } = useAuthStore();
-  console.log("User in notifc:", user);
-  console.log("SOCKET: ", socket);
+  
   const queryClient = useQueryClient();
   const { data: notifications, isLoading } = useGetUserNotifications(user._id);
 
@@ -30,6 +29,7 @@ const Notifications = () => {
     socket.on("newNotification", (notification) => {
       console.log(notification);
       queryClient.invalidateQueries(["unread-notifications", user._id]);
+      queryClient.invalidateQueries(["notifications",user._id]);
     });
   }, [socket, user._id, queryClient]);
   if (isLoading) return <h1>Loading..</h1>;

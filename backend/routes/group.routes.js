@@ -2,26 +2,26 @@ import express from "express";
 import multer from "multer";
 const upload = multer({ dest: "uploads/" });
 import {
-  createGroup,
+  createGroupController,
   deleteGroup,
   getUserGroups,
   getGroupById,
   getGroupMessages,
-  sendMessageToGroup,
-  addMemberToGroup,
+  sendMessageToGroupController,
   getGroupMemberById,
   getUsersFromSameUniversityNotInGroup,
   getGroupMembers,
   leaveGroup,
   kickMemberFromGroup,
-  makeUserAdmin,
-  updateGroupCoverImage,
   checkUserIsAdmin,
-  editMessageInGroup,
-  deleteMessageInGroup,
+  editMessageController,
+  deleteMessageController,
+  makeUserAdminController,
+  updateGroupCoverImageController,
+  addMemberToGroupController,
 } from "../controllers/group.controller.js";
 const router = express.Router();
-router.post("/", createGroup);
+router.post("/", createGroupController);
 router.delete("/:id", deleteGroup);
 router.get("/user/:userId", getUserGroups);
 router.get("/:id", getGroupById);
@@ -33,20 +33,20 @@ router.get(
   getUsersFromSameUniversityNotInGroup,
 );
 router.get("/:id/check-admin/:userId", checkUserIsAdmin);
-router.post("/:id/add-member", addMemberToGroup);
+router.post("/:id/add-member", addMemberToGroupController);
 router.post(
   "/:id/send-message",
-  upload.single("image"),
-  sendMessageToGroup,
+  upload.any(),
+  sendMessageToGroupController,
 );
-router.patch("/edit-message/:messageId", editMessageInGroup);
-router.post("/delete-message/:messageId", deleteMessageInGroup);
-router.post("/:id/make-admin/:userId", makeUserAdmin);
+router.patch("/edit-message/:messageId", editMessageController);
+router.post("/delete-message/:messageId", deleteMessageController);
+router.post("/:id/make-admin/:userId", makeUserAdminController);
 router.post("/:id/leave-group", leaveGroup);
 router.post("/:id/kick-member/:userId", kickMemberFromGroup);
 router.post(
   "/:id/change-group-image",
   upload.single("image"),
-  updateGroupCoverImage,
+  updateGroupCoverImageController,
 );
 export default router;

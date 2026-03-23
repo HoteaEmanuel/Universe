@@ -68,10 +68,7 @@ const AddMembersModal = ({ onClose, open }) => {
   ) {
     return;
   }
-  console.log(convoUsers);
-  console.log(usersFromSameUniversity);
-  console.log(followers);
-  console.log(following);
+
   return (
     <div
       className={`fixed inset-0 w-full h-full m-auto flex justify-center items-center  ${

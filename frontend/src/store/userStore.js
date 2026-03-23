@@ -102,7 +102,7 @@ export const useUserStore = create((set) => ({
     if (!id) return {};
     set({ isLoading: true });
     try {
-      const response = await axios.post(`${API_URL}/follow`, { followId: id });
+      const response = await axios.post(`${API_URL}/follow`, { followerId: id });
       return response;
     } catch (error) {
       set({ error: error });

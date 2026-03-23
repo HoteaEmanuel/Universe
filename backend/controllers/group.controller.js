@@ -2,57 +2,55 @@ import { GroupMembers } from "../models/group-members.model.js";
 import { Group } from "../models/group.model.js";
 import { User } from "../models/user.model.js";
 import { GroupMessage } from "../models/group-message.model.js";
-import { isObjectIdOrHexString } from "mongoose";
-import { getReceiverSocketId, io } from "../lib/socket.js";
-import { v2 as cloudinary } from "cloudinary";
-export const createGroup = async (req, res) => {
+import {
+  createGroupService,
+  deleteMessage,
+  editMessage,
+  giveAdminRole,
+  sendMessage,
+  updateGroupImage,
+} from "../services/group.service.js";
+import { createGroupMember } from "../repository/group-members.repository.js";
+export const createGroupController = async (req, res) => {
   try {
     const { name, description } = req.body;
-    console.log(name);
-    const newGroup = new Group({ name, description });
-    const adminMember = new GroupMembers({
-      memberId: req.userId,
-      groupId: newGroup._id,
-      role: "admin",
-    });
-    await newGroup.save();
-    await adminMember.save();
+    const data = { name, description, userId: req.userId };
+    const newGroup = await createGroupService(data);
     return res
       .status(201)
       .json({ message: "Group created successfully", group: newGroup });
   } catch (error) {
-    return res.status(400).json({ message: "Could not create group" });
+    return res.status(400).json({ message: error.message });
   }
 };
-export const addMemberToGroup = async (req, res) => {
+
+export const addMemberToGroupController = async (req, res) => {
   try {
-    console.log("ADDING A NEW MEMBER TO GROUP");
     const { userId } = req.body;
     const { id: groupId } = req.params;
-    console.log(userId, groupId);
-    const groupMember = new GroupMembers({
-      memberId: userId,
-      groupId: groupId,
+    
+    const groupData = { userId, groupId };
+    const groupMember = await createGroupMember(groupData);
+    return res.status(201).json({
+      message: "User added to the group succesfully",
+      data: groupMember,
     });
-    console.log(groupMember);
-    await groupMember.save();
-    console.log("SAVED");
-    return res
-      .status(201)
-      .json({ message: "User added to the group succesfully" });
   } catch (error) {
-    return res.status(400).json({ error });
+    return res.status(400).json({ message: error.message });
   }
 };
+
 export const deleteGroup = async (req, res) => {
   try {
     const { id } = req.params;
     await Group.findByIdAndDelete(id);
     return res.status(200).json({ message: "Group deleted successfully" });
   } catch (error) {
-    return res.status(400).json({ message: "Could not delete group" });
+    return res.status(400).json({ message: error.message });
   }
 };
+
+
 export const getUserGroups = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -61,13 +59,14 @@ export const getUserGroups = async (req, res) => {
     const groups = await Group.find({ _id: { $in: groupIds } })
       .populate("lastMessage")
       .sort({ updatedAt: -1 });
-    console.log("GROUP FOUND:");
-    console.log(groups);
+
     return res.status(200).json({ groups });
   } catch (error) {
-    return res.status(400).json({ message: "Could not retrieve user groups" });
+    return res.status(400).json({ message: error.message });
   }
 };
+
+
 export const getGroupById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -77,127 +76,62 @@ export const getGroupById = async (req, res) => {
     }
     return res.status(200).json({ group });
   } catch (error) {
-    return res.status(400).json({ message: "Could not retrieve group" });
+    return res.status(400).json({ message: error.message });
   }
 };
+
+
 export const getGroupMessages = async (req, res) => {
   try {
     const { id: groupId } = req.params;
-    console.log("GroupId: " + groupId);
     const groupMessages = await GroupMessage.find({
       groupId: groupId,
     }).populate(
       "senderId",
       "firstName lastName profilePicture accountType name",
     );
-    console.log("Group messages:");
-    console.log(groupMessages);
+    console.log("GROUP MESSAGES:", groupMessages);
     return res.status(200).json({ groupMessages });
-  } catch (error) {
-    return res
-      .status(400)
-      .json({ message: "Could not retrieve group messages" });
-  }
-};
-
-export const sendMessageToGroup = async (req, res) => {
-  try {
-    const { id: groupId } = req.params;
-    const authUserId = req.userId;
-    const { messageText } = req.body;
-    const image = req.file;
-
-    let result = undefined;
-    if (image?.path) {
-      result = await cloudinary.uploader.upload(image.path, {
-        folder: "message_images",
-        resource_type: "image",
-      });
-    }
-    const group = await Group.findById(groupId);
-    if (!group) throw new Error("Group doesnt exist");
-    const message = new GroupMessage({
-      senderId: authUserId,
-      groupId: groupId,
-      content: messageText || null,
-      imageUrl: result?.secure_url || null,
-      imagePublicId: result?.public_id || null,
-    });
-    await message.save();
-    group.lastMessage = message;
-    console.log("GROUP AFTER MESSAGE");
-    console.log(group);
-    await group.save();
-    console.log("Message created");
-    const users = await GroupMembers.find({ groupId: groupId });
-    if (!users) {
-      return res.status(404).json({ message: "No members in the group" });
-    }
-    users.forEach((user) => {
-      io.to(getReceiverSocketId(user.memberId.toString())).emit(
-        "newGroupMessage",
-        message,
-      );
-    });
-    return res.status(201).json(message);
-  } catch (error) {
-    return res.status(400).json({ error: error });
-  }
-};
-
-export const editMessageInGroup = async (req, res) => {
-  console.log("MESSAGE EDITED");
-  try {
-    const { messageId } = req.params;
-    console.log("ID: " + messageId);
-    const authUserId = req.userId;
-    console.log("SENIOR");
-    const { content: newText } = req.body;
-    console.log(newText);
-    const message = await GroupMessage.findOne({ _id: messageId });
-    if (!message) throw new Error("Message not found");
-
-    if (message.senderId.toString() !== authUserId.toString())
-      throw new Error("Unauthorized");
-    console.log("CONTINUE");
-    message.content = newText;
-    message.edited = true;
-
-    message.updatedAt = Date.now();
-    await message.save();
-    const groupId = message.groupId.toString();
-    const users = await GroupMembers.find({ groupId: groupId });
-    users.forEach((user) => {
-      io.to(getReceiverSocketId(user.memberId.toString())).emit(
-        "messageEdited",
-        message,
-      );
-    });
-    console.log("MESSAGE EDITED IN GROUP");
-    return res.status(200).json({ message });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 };
 
-export const deleteMessageInGroup = async (req, res) => {
+export const sendMessageToGroupController = async (req, res) => {
+  console.log("ENDPOINT HIT");
+  try {
+    const { id: groupId } = req.params;
+    const authUserId = req.userId;
+    const { messageText } = req.body;
+    const images = req.files;
+
+    const data = { groupId, images, authUserId, messageText };
+    const message = await sendMessage(data);
+    return res.status(201).json(message);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+export const editMessageController = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const authUserId = req.userId;
+    const { content } = req.body;
+    const data = { authUserId, content, messageId };
+    const editedMessage = await editMessage(data);
+    return res.status(200).json({ editedMessage });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+export const deleteMessageController = async (req, res) => {
   try {
     const { id: messageId } = req.params;
     const authUserId = req.userId;
-    const message = await GroupMessage.findOne({ _id: messageId });
-    if (!message) throw new Error("Message not found");
-    if (message.senderId.toString() !== authUserId.toString())
-      throw new Error("Unauthorized");
-    message.deleted = true;
-    await message.save();
-    const groupId = message.groupId.toString();
-    const users = await GroupMembers.find({ groupId: groupId });
-    users.forEach((user) => {
-      io.to(getReceiverSocketId(user.memberId.toString())).emit(
-        "messageDeleted",
-        messageId,
-      );
-    });
+    const data = { messageId, authUserId };
+    await deleteMessage(data);
     return res.status(200).json({ message: "Message deleted successfully" });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -218,6 +152,8 @@ export const getGroupMembers = async (req, res) => {
       .json({ message: "Could not retrieve group members" });
   }
 };
+
+
 export const getGroupMemberById = async (req, res) => {
   try {
     const { id: groupId } = req.params;
@@ -287,6 +223,9 @@ export const kickMemberFromGroup = async (req, res) => {
       .json({ message: "Could not kick member from group" });
   }
 };
+
+
+
 export const checkUserIsAdmin = async (req, res) => {
   try {
     const { id: groupId, userId } = req.params;
@@ -305,18 +244,13 @@ export const checkUserIsAdmin = async (req, res) => {
       .json({ message: "Could not verify if member is admin" });
   }
 };
-export const makeUserAdmin = async (req, res) => {
+
+
+export const makeUserAdminController = async (req, res) => {
   try {
     const { id: groupId, userId } = req.params;
-    const member = await GroupMembers.findOne({
-      groupId: groupId,
-      memberId: userId,
-    });
-    if (!member) {
-      return res.status(404).json({ message: "Member not found in group" });
-    }
-    member.role = "admin";
-    await member.save();
+    const data = { groupId, memberId: userId };
+    await giveAdminRole(data);
     return res
       .status(200)
       .json({ message: "Member promoted to admin successfully" });
@@ -324,29 +258,15 @@ export const makeUserAdmin = async (req, res) => {
     return res
       .status(400)
       .json({ message: "Could not promote member to admin" });
-  } finally {
-    set({ isLoading: false });
   }
 };
 
-export const updateGroupCoverImage = async (req, res) => {
+export const updateGroupCoverImageController = async (req, res) => {
   try {
     const { id: groupId } = req.params;
     const image = req.file;
-    let result = undefined;
-    if (image?.path) {
-      result = await cloudinary.uploader.upload(image.path, {
-        folder: "group_covers",
-        resource_type: "image",
-      });
-    }
-    const group = await Group.findById(groupId);
-    if (!group) {
-      return res.status(404).json({ message: "Group not found" });
-    }
-    group.coverImageUrl = result?.secure_url || group.coverImageUrl;
-    group.coverImagePublicId = result?.public_id || group.coverImagePublicId;
-    await group.save();
+    const data = { image, groupId };
+    await updateGroupImage(data);
     return res
       .status(200)
       .json({ message: "Updated the group cover image successfully" });

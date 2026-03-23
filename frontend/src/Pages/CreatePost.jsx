@@ -1,6 +1,5 @@
 import { BiSolidImageAdd } from "react-icons/bi";
 import { useForm } from "react-hook-form";
-import create_post from "../assets/create_post.svg";
 import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useCreatePostMutation } from "../queryAndMutation/mutations/post-mutation";
@@ -9,6 +8,8 @@ import { useDebounce } from "../hooks/Debounce";
 import MultipleImagesUploader from "../components/MultipleImagesUploader.jsx";
 import { IoCreate } from "react-icons/io5";
 import { FaEdit } from "react-icons/fa";
+
+
 const CreatePost = () => {
   useEffect(() => {
     document.title = "Create Post";
@@ -22,7 +23,7 @@ const CreatePost = () => {
   } = useForm();
   //  const {createPost}=usePostStore();
   const debouncedSearch = useDebounce(caption, 1500);
-  const { data: aiSuggestedHashTags, isLoading: isLoadingHashtags } =
+  const { data: aiSuggestedHashTags } =
     useGetAiHashtagsQuery(caption, debouncedSearch);
   //
 
@@ -41,7 +42,7 @@ const CreatePost = () => {
   console.log("FILES: ", files);
   console.log(caption.length);
   return (
-    <div className="w-full h-full ">
+    <section className="w-full h-full ">
       <form
         className="flex flex-1 flex-col justify-center gap-4 w-full p-10 md:px-20"
         onSubmit={handleSubmit(onSubmit)}
@@ -73,7 +74,7 @@ const CreatePost = () => {
           className="input resize-none overflow-x-hidden whitespace-pre-wrap break-words"
           {...register("body", {
             validate: (v) => {
-              if (v.length > 5000)
+              if (v.length > 5000 || v.length<5) 
                 return "The body should have less than 5000 characters";
               return true;
             },
@@ -112,7 +113,7 @@ const CreatePost = () => {
             required: "Add a tag",
             validate: (v) => {
               if (v.length === 0) return "Add a tag";
-              const regex = /^[A-Za-z0-9]+(, [A-Za-z0-9]+)*$/;
+              const regex = /^[A-Za-z0-9]+( [A-Za-z0-9]+)*$/;
               if (!regex.test(v)) return "Tags should be space separated words";
               return true;
             },
@@ -137,7 +138,7 @@ const CreatePost = () => {
           </button>
         </div>
       </form>
-    </div>
+    </section>
   );
 };
 

@@ -1,7 +1,6 @@
-import { timeStamp } from "console";
 import mongoose from "mongoose";
 
-const groupMessageModel = mongoose.Schema(
+const groupMessageSchema = new mongoose.Schema(
   {
     groupId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -14,8 +13,8 @@ const groupMessageModel = mongoose.Schema(
       required: true,
     },
     content: { type: String },
-    imageUrl: { type: String },
-    imagePublicId: { type: String },
+    imageUrls: { type: [String] },
+    imagePublicIds: { type: [String] },
     edited: { type: Boolean, default: false },
     deleted: { type: Boolean, default: false },
   },
@@ -23,4 +22,4 @@ const groupMessageModel = mongoose.Schema(
     timestamps: true,
   },
 );
-export const GroupMessage = mongoose.model("GroupMessage", groupMessageModel);
+export const GroupMessage = mongoose.model("GroupMessage", groupMessageSchema);

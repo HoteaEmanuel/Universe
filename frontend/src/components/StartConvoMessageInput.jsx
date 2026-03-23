@@ -23,7 +23,7 @@ const StartConversationMessageInput = () => {
   useEffect(() => {
     if (newConversationId) {
       queryClient.invalidateQueries[
-        "conversation_messages", newConversationId
+        ("conversation_messages", newConversationId)
       ];
       console.log(newConversationId);
       return navigate(`/conversation/${newConversationId}`);
@@ -36,10 +36,7 @@ const StartConversationMessageInput = () => {
   if (isPendingGettingConvo) return <p>Loading...</p>;
   if (conversation) return navigate(`/conversation/${conversation._id}`);
   return (
-    <div className="sticky bottom-2 top-0 right-0 left-0">
-      {/* {errors?.comment?.message && (
-        <p className="text-[10px] text-red-500">{errors.comment.message}</p>
-      )} */}
+    <section className="sticky bottom-2 top-0 right-0 left-0">
       <form className="w-full flex gap-4" onSubmit={handleSubmit(onSubmit)}>
         <input
           className="w-full border rounded-lg p-1 commentsContainer"
@@ -56,7 +53,7 @@ const StartConversationMessageInput = () => {
           <IoIosSend className="size-6 hover:scale-110" />
         </button>
       </form>
-    </div>
+    </section>
   );
 };
 

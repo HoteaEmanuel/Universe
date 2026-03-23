@@ -1,4 +1,5 @@
 export const universityDomains = {
+  "lucaciu.ro":"Colegiul National Vasile Lucaciu",
   "gmail.com": "No university yet",
   "unibuc.ro": "Universitatea din București",
   "ubbcluj.ro": "Universitatea Babeș-Bolyai din Cluj-Napoca",

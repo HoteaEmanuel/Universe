@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const groupMembersModel = mongoose.Schema(
+const groupMembersModel =new mongoose.Schema(
     {
         groupId: {
             type: mongoose.Schema.Types.ObjectId,

@@ -52,12 +52,14 @@ export const usePostStore = create((set) => ({
     try {
       const response = await axios.get(`${API_URL}/post/${id}`);
       const post = response.data.post;
-      const imageResponse = await fetch(post.imageUrl);
-      const imageBlob = await imageResponse.blob();
-      const image = new File([imageBlob], post.imagePublicId, {
-        type: imageBlob.type,
-      });
-      post.file = image;
+
+      console.log("FETCHED POST: ", post);
+      // const imageResponse = await fetch(post.imageUrl);
+      // const imageBlob = await imageResponse.blob();
+      // const image = new File([imageBlob], post.imagePublicId, {
+      //   type: imageBlob.type,
+      // });
+      // post.file = image;
       return post;
     } catch (error) {
       set({ error: error });
@@ -76,7 +78,7 @@ export const usePostStore = create((set) => ({
       if (post?.body) {
         formData.append("body", post.body);
       }
-      if(post?.location) {
+      if (post?.location) {
         formData.append("location", post.location);
       }
       formData.append("tags", post.tags);
@@ -95,16 +97,19 @@ export const usePostStore = create((set) => ({
     }
   },
   updatePost: async (data) => {
+    console.log("POST UPDATE CALLED");
     set({ isLoading: true });
     try {
       const formData = new FormData();
+      console.log("DATA: ", data);
       formData.append("body", data.body);
+      if (data?.location);
       formData.append("location", data.location);
       formData.append("tags", data.tags);
-      data.images.forEach((image, index) => {
+      data.images.forEach((image) => {
         formData.append("images", image);
       });
-
+      console.log("HIER?>");
       await axios.patch(`${API_URL}/posts/${data.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });

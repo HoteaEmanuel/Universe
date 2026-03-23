@@ -6,9 +6,9 @@ import { PiStudentBold } from "react-icons/pi";
 import { useState } from "react";
 import ProfileImageModal from "../Modals/ProfileImageModal";
 import { useUpdateBioMutation } from "../queryAndMutation/mutations/user-mutation";
-import { set } from "mongoose";
-import { CgProfile } from "react-icons/cg";
 import { useEffect } from "react";
+
+
 const EditProfile = () => {
   useEffect(() => {
     document.title = "Edit Profile";
@@ -19,7 +19,7 @@ const EditProfile = () => {
   const [bioError, setBioError] = useState("");
   const { mutate: updateBio } = useUpdateBioMutation();
   return (
-    <div className="border m-10 rounded-2xl p-10">
+    <section className="border m-10 rounded-2xl p-10">
       <div className="w-full flex flex-col gap-4 p-5">
         <img
           src={user?.profilePicture}
@@ -94,7 +94,7 @@ const EditProfile = () => {
           Save Changes
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 

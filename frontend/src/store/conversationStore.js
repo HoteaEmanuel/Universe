@@ -130,7 +130,7 @@ export const useConversationStore = create((set) => ({
     try {
       const response = await axios.patch(
         `${API_URL}/conversations/edit-messages/${id}`,
-        { text },
+        { newContent:text },
       );
       return response.data;
     } catch (error) {

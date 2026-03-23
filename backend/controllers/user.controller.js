@@ -6,6 +6,7 @@ import { Post } from "../models/post.model.js";
 import { SavedPost } from "../models/savedPosts.model.js";
 import { User } from "../models/user.model.js";
 import { v2 as cloudinary } from "cloudinary";
+import { follow, savePost, unfollow } from "../services/user.service.js";
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select(
@@ -64,39 +65,18 @@ export const updateUserImage = async (req, res) => {
     return res.status(200).json({ message: "Updated the image successfully" });
   } catch (error) {
     return res.status(400).json({
-      message: "Updating the profile picture went wrong",
-      error: error,
+      message: error.message,
     });
   }
 };
-export const savePost = async (req, res) => {
+export const savePostController = async (req, res) => {
   try {
     const id = req.params.id;
-    const post = await Post.findById(id);
-    if (!post) throw new Error("Post not found");
-
-    const user = await User.findById(req.userId);
-    if (!user) throw new Error("User not found");
-    if (post.userId.equals(req.userId)) {
-      throw new Error("Saving works only for other users posts");
-    }
-    const alreadySaved = await SavedPost.findOne({
-      user: req.userId,
-      post: id,
-    });
-    if (alreadySaved) {
-      throw new Error("Already saved");
-    }
-    const savedPost = new SavedPost({
-      user: req.userId,
-      post: id,
-    });
-    await savedPost.save();
-    return res.status(200).json({ message: "Saved the post" });
+    const data = { authUserId: req.userId, postId: id };
+    const savedPost = await savePost(data);
+    return res.status(200).json({ message: "Saved the post", data: savedPost });
   } catch (error) {
-    return res
-      .status(400)
-      .json({ message: "Saving the post went wrong", error: error });
+    return res.status(400).json({ message: error.error });
   }
 };
 
@@ -110,75 +90,27 @@ export const unsavePost = async (req, res) => {
     return res.status(400).json({ error: error });
   }
 };
-export const follow = async (req, res) => {
+export const followController = async (req, res) => {
   try {
     const userId = req.userId;
-    const followId = req.body.followId;
-    const user = await User.findById(userId);
-    const toFollowUser = await User.findById(
-      followId,
-      "firstName lastName _id name profilePicture",
-    );
-    const followedFromCache = await redis.get("followers-" + followId);
-    const followingFromCache = await redis.get("following-" + userId);
-    if (followingFromCache) await redis.del("following-" + userId);
-    if (followedFromCache) await redis.del("followers-" + followId);
-    if (!user || !toFollowUser) throw new Error("User not found");
-
-    const alreadyFollowing = await Follow.findOne({
-      follower: userId,
-      following: followId,
-    });
-
-    if (alreadyFollowing) {
-      throw new Error("Already following");
-    }
-    const follow = new Follow({
-      follower: userId,
-      following: followId,
-    });
-
-    const notification = await Notification.create({
-      title: "New follow",
-      message: `${user.firstName} started following you!`,
-      userId: followId,
-      actionUser: userId,
-      type: "follow",
-    });
-    io.to(getReceiverSocketId(followId.toString())).emit(
-      "newNotification",
-      notification,
-    );
-    await notification.save();
-    console.log("NOTIFICATION CREATED: ", notification);
-    await follow.save();
-    
+    const followerId = req.body.followerId;
+    const data = { authUserId: userId, followerId };
+    console.log("FOLLOW CONBTROL");
+    await follow(data);
     return res.status(200).json({ message: "Followed :)!" });
   } catch (error) {
     return res.status(400).json({ error: error });
   }
 };
-export const unfollow = async (req, res) => {
+export const unfollowController = async (req, res) => {
   try {
     const userId = req.userId;
     const unfollowId = req.body.unfollowId;
-    const user = await User.findById(userId);
-    const unfollowUser = await User.findById(unfollowId);
-    const followedFromCache = await redis.get("followers-" + unfollowId);
-    const followingFromCache = await redis.get("following-" + userId);
-    if (followingFromCache) await redis.del("following-" + userId);
-    if (followedFromCache) await redis.del("followers-" + unfollowId);
-    if (!user || !unfollowUser) throw new Error("User not found");
-    const alreadyFollowing = await Follow.findOne({
-      follower: userId,
-      following: unfollowId,
-    });
-    if (!alreadyFollowing) {
-      throw new Error("Not following");
-    }
-
-    console.log("THE USER THAT WILL BE UNFOLLOWED: ", unfollowUser);
-    await Follow.deleteOne({ follower: userId, following: unfollowId });
+    const data = {
+      authUserId: userId,
+      unfollowerId: unfollowId,
+    };
+    await unfollow(data);
     return res.status(200).json({ message: "Unfollowed!" });
   } catch (error) {
     return res.status(400).json({ error: error });

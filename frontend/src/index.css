@@ -55,6 +55,9 @@
 .container {
   @apply bg-white;
 }
+.wrapper{
+  @apply h-full w-full flex flex-col items-center justify-center;
+}
 [data-theme="dark"] .container {
   @apply bg-gray-900;
 }

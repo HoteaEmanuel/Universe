@@ -14,6 +14,7 @@ const MessageInput = ({ images, setImages, messageType }) => {
   const sendMessage = useSendMessageMutation(id);
   const [message, setMessage] = useState("");
   const { mutateAsync: sendMessageToGroup } = useSendMessageToGroupMutation();
+  console.log(images);
   // const { sendMessage } = useConversationStore();
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -69,7 +70,7 @@ const MessageInput = ({ images, setImages, messageType }) => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        {message.length || images.length ? (
+        {message.length || images?.length ? (
           <button>
             <IoIosSend className="violet size-6 md:size-8 hover:scale-110 active:transition-transform active:duration-200 active:-translate-y-2 active:translate-x-2" />
           </button>

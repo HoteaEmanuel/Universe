@@ -30,7 +30,7 @@ const Conversation = () => {
   if (isPendingUser || isPendingMessages) return <p>Loading...</p>;
 
   return (
-    <div className="w-full overflow-y-hidden">
+    <section className="w-full overflow-y-hidden">
       <div className="flex justify-center items-center gap-1 w-full p-2 md:p-5">
         <div className="flex flex-col">
           {user.profilePicture ? (
@@ -60,7 +60,7 @@ const Conversation = () => {
         <SlOptionsVertical className="size-5 icon" />
       </div>
       <ConversationLayout id={convoId} messages={messages}></ConversationLayout>
-    </div>
+    </section>
   );
 };
 
