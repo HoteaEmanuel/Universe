@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetConversationByUsersIdsQuery } from "../queryAndMutation/queries/conversation-queries.js";
 import { useEffect } from "react";
 import Profile from "../components/Profile.jsx";
-
+import ProfileSkelet from "../skeletons/ProfileSkelet.jsx";
 
 const OthersProfile = () => {
   useEffect(() => {
@@ -39,9 +39,9 @@ const OthersProfile = () => {
   const followMutation = useFollowMutation(user?._id, loggedUser._id);
   const unfollowMutation = useUnfollowMutation(user?._id, loggedUser._id);
 
-  if (isPendingPosts) return <p>Loading the followers...</p>;
+  if (isPendingPosts) return <ProfileSkelet />;
   if (isPendingCheckFollowing || isPendingConversation || isPendingUser) {
-    return <p>Loading...</p>;
+    return <ProfileSkelet />;
   }
   return (
     <section className="flex flex-col w-full h-full overflow-y-auto">

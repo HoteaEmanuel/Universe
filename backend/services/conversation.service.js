@@ -10,20 +10,39 @@ import {
 } from "../repository/message.repository.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 import { v2 as cloudinary } from "cloudinary";
+import {
+  createMessageNotification,
+  createNotification,
+} from "../repository/notification.repository.js";
+import { findUserById } from "../repository/user.repository.js";
+
+import { getActiveConversationUsers } from "../lib/socket.js";
 export const startConversation = async (data) => {
   const { authUserId, otherUserId, messageData } = data;
   if (!messageData) throw new Error("No message");
-  const message = await createMessage(data);
+  console.log("NEW CONV SERVICE");
+  console.log(authUserId, otherUserId, messageData);
 
   const conversation = await findConversationByParticipants(
     authUserId,
     otherUserId,
   );
   if (conversation) throw new Error("Conversation already exists");
-
+  console.log("CREATING A CONVO");
   const newConversation = await createConversation(data);
-
+  console.log("CONVO CREATED: ", newConversation);
+  const messageBody = {
+    conversationId: newConversation._id,
+    senderId: authUserId,
+    receiverId: otherUserId,
+    content: messageData,
+  };
+  console.log("AICI");
+  const message = await createMessage(messageBody);
+  console.log("MESS: ", message);
   message.conversationId = newConversation._id;
+  console.log("HERE");
+  newConversation.lastMessage = message;
   await newConversation.save();
   await message.save();
   io.to(getReceiverSocketId(otherUserId.toString())).emit(
@@ -31,12 +50,14 @@ export const startConversation = async (data) => {
     message,
   );
   const newConversationId = newConversation._id;
-
+  console.log("NEW CONVERSATION CREATED");
   return newConversationId;
 };
 
 export const sendMessage = async (data) => {
+  console.log("SEND MESSAGE");
   const { convoId, messageText, images, authUserId } = data;
+  console.log(convoId, messageText, images);
   let conversation = await findConversationById(convoId);
   if (!conversation) throw new Error("Conversation doesnt exist");
 
@@ -62,7 +83,7 @@ export const sendMessage = async (data) => {
   const messageData = {
     senderId: authUserId,
     receiverId: userId.toString(),
-    conversationId:convoId,
+    conversationId: convoId,
     content: messageText,
     imageUrls: imageSecureUrls,
     imagePublicIds: imagePublicIds,
@@ -76,6 +97,26 @@ export const sendMessage = async (data) => {
   conversation.lastMessage = message;
   await conversation.save();
   await message.save();
+  const user = await findUserById(userId);
+  console.log("USER FOUND : ", user);
+
+  const activeConversationUsers = getActiveConversationUsers(convoId);
+  console.log("CONVO INFO:")
+  console.log(activeConversationUsers);
+  console.log(userId)
+  if (!activeConversationUsers.has(userId.toString())) {
+    const notifData = {
+      actionUserId: authUserId,
+      userId: userId,
+      title: "New message",
+      type: "message",
+      message: `${user?.firstName || user?.name}: ${message?.content ? message.content : "IMAGE"}`,
+      conversationId: convoId,
+    };
+
+    const notification = await createMessageNotification(notifData);
+    console.log("NOTIF: ", notification);
+  }
 
   io.to(getReceiverSocketId(userId.toString())).emit("newMessage", message);
   return message;

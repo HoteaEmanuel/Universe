@@ -19,7 +19,9 @@ import {
   makeUserAdminController,
   updateGroupCoverImageController,
   addMemberToGroupController,
+  getActiveGroupUsersOnConversation,
 } from "../controllers/group.controller.js";
+import { rateLimiter } from "../middleware/rateLimiter.js";
 const router = express.Router();
 router.post("/", createGroupController);
 router.delete("/:id", deleteGroup);
@@ -34,6 +36,8 @@ router.get(
 );
 router.get("/:id/check-admin/:userId", checkUserIsAdmin);
 router.post("/:id/add-member", addMemberToGroupController);
+
+router.use(rateLimiter);
 router.post(
   "/:id/send-message",
   upload.any(),
@@ -49,4 +53,6 @@ router.post(
   upload.single("image"),
   updateGroupCoverImageController,
 );
+
+router.get('/active-users/:id',getActiveGroupUsersOnConversation);
 export default router;

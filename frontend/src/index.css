@@ -159,6 +159,13 @@ body {
 [data-theme="dark"] .icon{
   @apply text-gray-300 hover:bg-gray-800 rounded-full p-1 transition-colors duration-200 ease-in-out;
 }
+
+.icon-with-bg{
+  @apply text-gray-800 bg-gray-300 hover:bg-gray-200  hover:scale-110 cursor-pointer rounded-full p-1 transition-colors duration-200 ease-in-out;
+}
+[data-theme="dark"] .icon-with-bg{
+  @apply text-gray-300 bg-gray-700 hover:bg-gray-800 rounded-full p-1 transition-colors duration-200 ease-in-out;
+}
 @layer utilities {
   .shadow {
     @apply shadow-[0_6px_12px_-2px_rgba(0,0,0,0.3),0_-4px_8px_-1px_rgba(0,0,0,0.15)];
@@ -500,3 +507,10 @@ input:checked + .slider1:before {
 
 .input:checked ~ .sun svg { opacity: 0; }
 .input:checked ~ .moon svg { opacity: 1; } */
+
+.bg{
+  @apply bg-gray-500;
+}
+[data-theme="dark"] .bg {
+  @apply bg-gray-900;
+}

@@ -3,7 +3,7 @@ import { useGroupStore } from "../../store/groupStore";
 export const useGetUserGroups = (userId) => {
   const { getUserGroups } = useGroupStore();
   return useQuery({
-    queryFn: () => getUserGroups(userId),
+    queryFn: async() =>await getUserGroups(userId),
     queryKey: ["user-groups", userId],
   });
 };
@@ -11,7 +11,7 @@ export const useGetUserGroups = (userId) => {
 export const useGetGroupById = (id) => {
   const { getGroupById } = useGroupStore();
   return useQuery({
-    queryFn: () => getGroupById(id),
+    queryFn:async () =>await getGroupById(id),
     queryKey: ["group", id],
   });
 };
@@ -19,7 +19,7 @@ export const useGetGroupById = (id) => {
 export const useGetGroupMessages = (id) => {
   const { getGroupMessages } = useGroupStore();
   return useQuery({ 
-    queryFn: () => getGroupMessages(id),
+    queryFn:async () =>await getGroupMessages(id),
     queryKey: ["group-messages", id],
   });
 };
@@ -27,15 +27,23 @@ export const useGetGroupMessages = (id) => {
 export const useGetGroupMembers = (groupId) => {
   const { getGroupMembers } = useGroupStore();
   return useQuery({ 
-    queryFn: () => getGroupMembers(groupId),
+    queryFn: async() => await getGroupMembers(groupId),
     queryKey: ["group-members", groupId],
+  });
+}
+
+export const useGetActiveGroupMembers=(groupId)=>{
+  const { getActiveMembers } = useGroupStore();
+  return useQuery({ 
+    queryFn: async() =>await getActiveMembers(groupId),
+    queryKey: ["active-group-members", groupId],
   });
 }
 
 export const useGetGroupMemberById = (id) => {
   const { getGroupMemberById } = useGroupStore();
   return useQuery({ 
-    queryFn: () => getGroupMemberById(id),
+    queryFn:async () => getGroupMemberById(id),
     queryKey: ["group-member", id],
   });
 }

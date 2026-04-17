@@ -158,8 +158,8 @@ export const loginWeb = async (req, res) => {
       .status(200)
       .json({ message: "Logged in successfully", user: userExists });
   } catch (error) {
-    console.log(error);
-    return res.status(400).json({ message: "Could not log in" });
+    console.log("ERROR HERE: " ,error);
+    return res.status(400).json({ message: error.message });
   }
 };
 

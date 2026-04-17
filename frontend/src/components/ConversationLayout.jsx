@@ -6,28 +6,50 @@ import { useState } from "react";
 import cancel from "../assets/cancel.svg";
 import FullImageModal from "../Modals/FullImageModal";
 import MessageOptionsModal from "../Modals/MessageOptionsModal";
+import { FaAngleDown } from "react-icons/fa";
 const ConversationLayout = ({ messages }) => {
   const { user } = useAuthStore();
-
+  const conversationRef = useRef();
   const [imageToFull, setImageToFull] = useState(null);
-
-  const messageEnd = useRef(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(null);
+  const messageEndRef = useRef(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
 
   const [images, setImages] = useState([]);
   const [open, setOpen] = useState(false);
   const [openAddedImages, setOpenAddedImages] = useState(false);
-
+  const handleScrollDown = () => {
+    console.log("SCROLL DOWN");
+    messageEndRef?.current.scrollIntoView({ behavior: "smooth" });
+  };
   useEffect(() => {
-    if (messageEnd.current && messages) {
-      messageEnd.current.scrollIntoView({ behavior: "smooth" });
+    if (messageEndRef.current && messages) {
+      console.log("IS OKAY?");
+      console.log(messageEndRef)
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+  useEffect(() => {
+    const el = conversationRef.current;
+    const handleScroll = () => {
+      console.log("SCROLL DOWN");
+      const distanceFromBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight;
+      setShowScrollBtn(distanceFromBottom > 500);
+    };
+
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className=" max-h-[85%] md:h-screen relative p-1  overflow-x-hidden">
-      <div className="w-full h-[80vh] md:h-[75vh] overflow-y-auto rounded-2xl p-2 my-1 conversationContainer">
+      <div
+        className="w-full h-[80vh] md:h-[75vh] overflow-y-auto rounded-2xl p-2 my-1 conversationContainer"
+        ref={conversationRef}
+      >
         <ul className="flex flex-col gap-4 ">
-          {messages.length ? (
+          {messages?.length ? (
             messages.map((message) => (
               <li
                 key={message._id}
@@ -36,7 +58,6 @@ const ConversationLayout = ({ messages }) => {
                     ? "justify-end"
                     : "justify-start"
                 }`}
-                ref={messageEnd}
                 onClick={() => {
                   if (message.senderId === user._id) {
                     setSelectedMessage(message);
@@ -48,22 +69,23 @@ const ConversationLayout = ({ messages }) => {
                     user._id === message.senderId ? "chat-end" : "chat-start"
                   }`}
                 >
-                  {message?.deleted === false && message.imageUrls?.length > 0 && (
-                    <ul>
-                      {message.imageUrls.map((image, index) => (
-                        <li key={index} className="flex justify-start py-1">
-                          <img
-                            className="max-h-2/3 max-w-2/3 md:max-w-xs "
-                            src={image}
-                            onClick={() => {
-                              setImageToFull(image);
-                              setOpen(true);
-                            }}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  {message?.deleted === false &&
+                    message.imageUrls?.length > 0 && (
+                      <ul>
+                        {message.imageUrls.map((image, index) => (
+                          <li key={index} className="flex justify-start py-1">
+                            <img
+                              className="max-h-2/3 max-w-2/3 md:max-w-xs "
+                              src={image}
+                              onClick={() => {
+                                setImageToFull(image);
+                                setOpen(true);
+                              }}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    )}
 
                   <div className="flex  gap-2 min-w-0">
                     <div className="flex flex-col">
@@ -114,6 +136,7 @@ const ConversationLayout = ({ messages }) => {
           ) : (
             <h1>No messages yet!</h1>
           )}
+          <div ref={messageEndRef}></div>
         </ul>
       </div>
       <FullImageModal
@@ -124,7 +147,7 @@ const ConversationLayout = ({ messages }) => {
           setImageToFull(null);
         }}
       />
-      <div ref={messageEnd} />
+  
       <MessageOptionsModal
         open={selectedMessage}
         onClose={() => setSelectedMessage(null)}
@@ -162,7 +185,14 @@ const ConversationLayout = ({ messages }) => {
           ))}
         </ul>
       )}
-
+      {showScrollBtn && (
+        <div className="absolute top-4/5 right-5">
+          <FaAngleDown
+            className="size-8 icon-with-bg"
+            onClick={handleScrollDown}
+          />
+        </div>
+      )}
       <div className="fixed bottom-20 sm:bottom-0 w-[90vw] md:w-[70vw]">
         <MessageInput
           images={images}

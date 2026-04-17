@@ -6,12 +6,16 @@ import { useSendMessageMutation } from "../queryAndMutation/mutations/conversati
 import { BiSolidImageAdd } from "react-icons/bi";
 import ImagePickerModal from "../Modals/ImagePickerModal";
 import { useSendMessageToGroupMutation } from "../queryAndMutation/mutations/group-mutation";
+import { useAuthStore } from "../store/authStore";
+import { useConversationStore } from "../store/conversationStore";
+import { toast } from "sonner";
 
 const MessageInput = ({ images, setImages, messageType }) => {
   // const { sendMessage } = useConversationStore();
   const { id } = useParams();
+  const {error} = useConversationStore();
   // const { sendMessage } = useConversationStore();
-  const sendMessage = useSendMessageMutation(id);
+  const {mutate:sendMessage} = useSendMessageMutation(id);
   const [message, setMessage] = useState("");
   const { mutateAsync: sendMessageToGroup } = useSendMessageToGroupMutation();
   console.log(images);
@@ -33,10 +37,10 @@ const MessageInput = ({ images, setImages, messageType }) => {
         sendMessageToGroup({ id, message: message });
       } else {
         console.log("SENDING DIRECT MESSAGE");
-        sendMessage.mutateAsync({ id, message: message });
+       await sendMessage({ id, message: message });
       }
     }
-
+    if(error==="Rate limit exceeded") toast.error("Spamming behaviour blocked");
     setImages([]);
     setMessage("");
     e.target.reset();

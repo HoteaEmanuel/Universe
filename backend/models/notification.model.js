@@ -16,7 +16,7 @@ const NotificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["post-like", "follow"],
+      enum: ["post-like", "post-comment","follow","message"],
     },
     message: {
       type: String,
@@ -24,6 +24,12 @@ const NotificationSchema = new mongoose.Schema(
     read: {
       type: Boolean,
       default: false,
+    },
+    conversationId:{
+      type:mongoose.Schema.Types.ObjectId,
+    },
+    groupId:{
+      type:mongoose.Schema.Types.ObjectId,
     },
     userAvatar: {
       type: String,

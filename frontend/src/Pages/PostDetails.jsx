@@ -37,6 +37,7 @@ const PostDetails = () => {
   useEffect(() => {
     document.title = "Post Details";
   }, []);
+  const {socket}= useAuthStore();
   const { id: postId } = useParams();
   const { data: post, isPending: isPendingPost } = useGetPostQuery(postId);
   const [showComments, setShowComments] = useState(false);
@@ -56,6 +57,14 @@ const PostDetails = () => {
       }
     }
   }, []);
+
+  useEffect(()=>{
+    socket.emit("view_post",postId);
+
+    return ()=>{
+      socket.emit("leave_post",postId);
+    }
+  },[socket,postId]);
 
   const { data: creator, isPending: isPendingPostUser } = usePostUserQuery(
     userId ?? null,

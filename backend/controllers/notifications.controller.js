@@ -25,6 +25,22 @@ export const getUserNotifications = async (req, res) => {
   }
 };
 
+export const getUnreadMessageNotifications=async(req,res)=>{
+  try {
+    console.log("GET UNREAD MESSAGE NOTIF:");
+    const id = req.params.id;
+    console.log(id);
+    const notifications = await Notification.find({
+      userId: id,
+      read: false,
+      type: "message"
+    }).sort({ createdAt: -1 });
+    return res.status(200).json({ notifications: notifications });
+  } catch (error) {
+    return res.status(400).json({ error });
+  }
+}
+
 export const getUnreadNotifications = async (req, res) => {
   try {
     console.log("GET UNREAD NOTIF:");
@@ -33,6 +49,7 @@ export const getUnreadNotifications = async (req, res) => {
     const notifications = await Notification.find({
       userId: id,
       read: false,
+      type: {$ne :"message"}
     }).sort({ createdAt: -1 });
 
     console.log("UNREAD NOTIFS: ", notifications);
@@ -62,6 +79,17 @@ export const seeNotifications = async (req, res) => {
     await Notification.updateMany({ userId: id }, { $set: { read: true } });
     return res.status(200).json({ message: "Notifications marked as read" });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return res.status(400).json({ error: error.message });
   }
 };
+
+export const seeNewConversationMessages=async(req,res)=>{
+  try{
+    const id=req.params.id;
+    await Notification.updateMany({userId:req.userId,conversationId:id}, {$set: { read:true}});
+    return res.status(200).json({message:"All new messages were read"});
+  }
+  catch(error){
+    return res.status(400).json({error:error.message})
+  }
+}

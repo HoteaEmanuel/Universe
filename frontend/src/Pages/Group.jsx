@@ -1,7 +1,9 @@
 import React from "react";
 import ProfileCard from "../components/ProfileCard";
+import { BiLoader } from "react-icons/bi";
 import { useParams } from "react-router-dom";
 import {
+  useGetActiveGroupMembers,
   useGetGroupById,
   useGetGroupMessages,
 } from "../queryAndMutation/queries/group-queries";
@@ -17,15 +19,20 @@ import { useAuthStore } from "../store/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import ProfileImageModal from "../Modals/ProfileImageModal";
 import GroupImageModal from "../Modals/GroupImageModal";
+import { useSeeNewMessages } from "../queryAndMutation/mutations/notification-mutation";
 const Group = () => {
   const [menu, setMenu] = useState(false);
   const [groupImageModal, setGroupImageModal] = useState(false);
-  const { socket } = useAuthStore();
+  const { user, socket } = useAuthStore();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const { data: group, isPending: isPendingGroup } = useGetGroupById(id);
+  const { mutate: seeNewMessages } = useSeeNewMessages(user._id, id);
   const { data: messages, isPending: isPendingMessages } =
     useGetGroupMessages(id);
+
+  const { data: activeMembers, isPending: isPendingActiveMembers } =
+    useGetActiveGroupMembers(id);
   useEffect(() => {
     const handleNewGroupMessage = (message) => {
       console.log("New message received:", message);
@@ -42,14 +49,24 @@ const Group = () => {
     };
   }, [socket, queryClient, id]);
 
-  if (isPendingGroup) return <p>Loading...</p>;
-  if (isPendingMessages) return <p>Loading...</p>;
+  useEffect(() => {
+    socket.emit("view_conversation", id, user._id);
+    seeNewMessages();
+    return () => {
+      socket.emit("leave_conversation", id, user._id);
+    };
+  }, [socket, seeNewMessages, user, id]);
 
+  if (isPendingActiveMembers || isPendingGroup || isPendingMessages)
+    return <BiLoader className="size-10 main-dark animate-spin" />;
+
+ 
+  console.log("ACTIVE MEMBERS: ", activeMembers);
   return (
     <div className="w-full h-screen">
       <div className="p-5 flex border-b w-full border-gray-500 items-center gap-4">
         <button onClick={() => setGroupImageModal(true)}>
-          {group.coverImageUrl ? (
+          {group?.coverImageUrl ? (
             <img
               src={group.coverImageUrl}
               alt="cover"
@@ -68,6 +85,7 @@ const Group = () => {
               <p className="text-[10px]">{group.description}</p>
             </>
           )}
+          <p>Active members: {activeMembers && activeMembers.length}</p>
         </div>
         <SlOptionsVertical
           className="ml-auto size-8 icon"

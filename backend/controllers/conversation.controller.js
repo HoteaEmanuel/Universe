@@ -115,9 +115,10 @@ export const startConversationController = async (req, res) => {
     const { id: userId } = req.params;
     const authUserId = req.userId;
     const { message: messageData } = req.body;
-    const data = { authUserId, id: otherUserId, messageData };
-    await startConversation(data);
-    return res.status(201).json({ message: "Conversation started" });
+    const data = { authUserId, otherUserId: userId, messageData };
+    console.log("AICEA")
+    const newConversationId=await startConversation(data);
+    return res.status(201).json({ message: "Conversation started",id: newConversationId});
   } catch (error) {
     return res.status(400).json({ error: error });
   }

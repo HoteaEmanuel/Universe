@@ -39,7 +39,7 @@ const NewConversation = () => {
   return (
     <div className="p-10">
       <IoChevronBackCircle
-        className="size-10 mb-10 violet hover:scale-105 cursor-pointer"
+        className="size-10 mb-10 text-violet-900 hover:scale-105 cursor-pointer"
         onClick={() => navigate("/chat")}
       />
 

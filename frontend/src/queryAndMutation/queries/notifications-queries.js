@@ -18,3 +18,12 @@ export const useGetUnreadNotifications = (userId) => {
         queryKey: ["unread-notifications", userId],
     });
 };  
+
+
+export const useGetNewMessageNotifications=(userId)=>{
+   const { getNewMessagesNotifications } = useNotificationStore(); 
+    return useQuery({   
+        queryFn: async () => await getNewMessagesNotifications(userId),
+        queryKey: ["new-messages", userId],
+    });
+}

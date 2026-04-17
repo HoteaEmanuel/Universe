@@ -29,13 +29,13 @@ import { createNotification } from "../repository/notification.repository.js";
 export const getUserPosts = async (userId) => {
   const user = await findUserById(userId);
   if (!user) throw new Error("User does not exist");
-  const posts = await redis.get("user-posts-" + userId);
-  if (posts) {
-    return posts;
-  }
+  // const posts = await redis.get("user-posts-" + userId);
+  // if (posts) {
+  //   return posts;
+  // }
   const userPosts = await findUserPosts(userId);
 
-  await redis.set("user-posts-" + userId, JSON.stringify(userPosts));
+  // await redis.set("user-posts-" + userId, JSON.stringify(userPosts));
   return userPosts;
 };
 
@@ -126,9 +126,9 @@ export const createNewPost = async (data) => {
   // if (location && location.trim().length) post.location = location;
   // refresh cache for the user posts
   const posts = await redis.get("user-posts-" + userId);
-  if (posts) await redis.del("user-posts-" + userId);
-  posts.push(post);
-  redis.set("user-posts-" + userId, JSON.stringify(posts));
+  // if (posts) await redis.del("user-posts-" + userId);
+  // posts.push(post);
+  // redis.set("user-posts-" + userId, JSON.stringify(posts));
   return post;
 };
 
@@ -215,8 +215,8 @@ export const updatePost = async (data) => {
   post.imagesPublicIds = imagePublicIds;
   if (postData?.location.trim() !== "") post.location = postData.location;
   post.tags = postData.tags;
-  const cachedPost = await redis.get("user-posts-" + userId);
-  if (cachedPost) await redis.del("user-posts-" + userId);
+  // const cachedPost = await redis.get("user-posts-" + userId);
+  // if (cachedPost) await redis.del("user-posts-" + userId);
 
   console.log("FINAL POST : ", post);
   await post.save();
@@ -226,11 +226,11 @@ export const deletePost = async (data) => {
   const { postId, userId } = data;
   const post = await findPostById(postId);
   await deleteLikes(postId);
-  const posts = await redis.get("user-posts-" + userId);
+  // const posts = await redis.get("user-posts-" + userId);
   if (!post) throw new Error("Post not found");
-  if (posts) await redis.del("user-posts-" + userId);
-  posts.delete(post);
-  redis.set("user-posts-" + userId, JSON.stringify(posts));
+  // if (posts) await redis.del("user-posts-" + userId);
+  // posts.delete(post);
+  // redis.set("user-posts-" + userId, JSON.stringify(posts));
 };
 
 export const getSearchedPosts = async (text) => {

@@ -110,9 +110,12 @@ export const useAuthStore = create((set, get) => ({
         email,
         password,
       });
+      console.log(response)
       set({ isAuthenticated: true, user: response?.data?.user || null });
       get().connectSocket();
     } catch (error) {
+      console.log("ERROR FOUND");
+      console.log(error)
       set({ error: error?.response?.data?.message || "Login failed" });
     } finally {
       set({ isLoading: false });

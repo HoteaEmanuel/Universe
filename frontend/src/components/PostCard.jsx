@@ -29,6 +29,7 @@ import { formatDateDetailed } from "../utils/formatDate";
 import LikesModal from "../Modals/LikesModal";
 import { urlPathName } from "../utils/urlPathFromName";
 import ImageSlider from "./ImageSlider";
+import PostSkelet from "../skeletons/PostSkelet";
 const PostCard = ({ post }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -170,8 +171,7 @@ const PostCard = ({ post }) => {
     isPendingLikes ||
     isPendingCommentsCount
   )
-    return <p>Loading...</p>;
-  console.log("POSTARE: ", post);
+    return <PostSkelet/>;
   const { firstName, name, lastName, profilePicture } = creator;
   return (
     <Link

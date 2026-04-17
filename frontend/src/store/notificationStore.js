@@ -19,6 +19,15 @@ export const useNotificationStore = create(() => ({
       throw new Error(error);
     }
   },
+
+  getNewMessagesNotifications:async(id)=>{
+     try {
+      const response = await axios.get(`${API_URL}/unread-message-notifications/${id}`);
+      return response.data.notifications;
+    } catch (error) {
+      throw new Error(error);
+    }
+  },
   seeNotifications: async (id) => {
     try {
       const response = await axios.post(`${API_URL}/seen-notifications/${id}`);
@@ -27,4 +36,14 @@ export const useNotificationStore = create(() => ({
       throw new Error(error);
     }
     },
+    seeNewMessages:async(convoId)=>{
+      try{
+        console.log("SEE NEW MESSSAGES");
+        const response=await axios.post(`${API_URL}/see-new-messages/${convoId}`);
+        return response.data.message;
+      }
+      catch(error){
+        throw new Error(error);
+      }
+    }
 }));

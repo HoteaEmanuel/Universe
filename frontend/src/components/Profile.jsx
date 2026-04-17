@@ -112,14 +112,14 @@ const Profile = ({ user }) => {
               (setOpenFollowersModal(true), setOpenFollowingModal(false));
             }}
           >
-            <p>{followers?.length}</p>
+            <p className="font-bold">{followers?.length}</p>
             <h1>Followers</h1>
           </button>
           <button
             className="flex gap-2"
             onClick={() => setOpenFollowingModal(true)}
           >
-            <p>{following?.length}</p>
+            <p className="font-bold">{following?.length}</p>
             <h1>Following</h1>
           </button>
         </div>

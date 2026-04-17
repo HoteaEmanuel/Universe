@@ -88,9 +88,9 @@ const ChatContainer = () => {
       <div className="overflow-y-auto w-full">
         {filterConversations.length ? (
           <ul className="flex flex-col gap-4">
-            {filterConversations.map((data) => (
+            {filterConversations.map((data,index) => (
               <li
-                key={data.id}
+                key={index}
                 className="commentsContainer flex p-2 rounded-xl cursor-pointer"
                 onClick={() => {
                   data.name

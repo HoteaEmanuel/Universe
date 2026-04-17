@@ -11,6 +11,7 @@ import {
   updateGroupImage,
 } from "../services/group.service.js";
 import { createGroupMember } from "../repository/group-members.repository.js";
+import { getActiveConversationUsers } from "../lib/socket.js";
 export const createGroupController = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -277,3 +278,18 @@ export const updateGroupCoverImageController = async (req, res) => {
     });
   }
 };
+
+
+export const getActiveGroupUsersOnConversation =async (req,res)=>{
+try{
+  const { id } = req.params;
+  const activeUsersOnConversation=getActiveConversationUsers(id);
+
+  console.log("ACTIVE USERS HERE: ")
+  console.log(activeUsersOnConversation);
+  return res.status(200).json({ activeUsers: [...activeUsersOnConversation]});
+}
+catch(error){
+  return res.status(400).json({error:error.message});
+}
+}

@@ -7,9 +7,11 @@ import { FaUserCircle } from "react-icons/fa";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import logo from "../assets/logo_1.png";
-import { useGetUnreadNotifications } from "../queryAndMutation/queries/notifications-queries";
+import {
+  useGetNewMessageNotifications,
+  useGetUnreadNotifications,
+} from "../queryAndMutation/queries/notifications-queries";
 import { useGlobalStore } from "../store/globalStore";
-
 
 const SideSection = () => {
   const pathname = useLocation();
@@ -25,12 +27,16 @@ const SideSection = () => {
       });
     }
   }, [user.role]);
-  const { data: notifications, isPending } = useGetUnreadNotifications(
-    user._id,
-  );
-  if (isPending) return <h1>Loading...</h1>;
+  const { data: notifications, isPendingNormalNotifications } =
+    useGetUnreadNotifications(user._id);
+
+  const { data: messageNotifications, isPendingMessageNotifications } =
+    useGetNewMessageNotifications(user._id);
+  if (isPendingNormalNotifications || isPendingMessageNotifications)
+    return <h1>Loading...</h1>;
 
 
+  console.log(messageNotifications);
   return (
     <aside className="sideTab flex flex-col items-center justify-center w-1/4 h-screen hidden md:block shadow overflow-hidden">
       <div className="w-full flex items-center justify-center px-2 mb-20">
@@ -60,7 +66,19 @@ const SideSection = () => {
                         item.newNotification &&
                         notifications?.length > 0 && (
                           <div className="absolute top-2 right-2 size-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
-                            {notifications.length}
+                            {notifications.length < 100
+                              ? notifications.length
+                              : "99+"}
+                          </div>
+                        )}
+
+                      {notificationsOn &&
+                        item.notification &&
+                        messageNotifications?.length > 0 && (
+                          <div className="absolute top-2 right-2 size-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
+                            {messageNotifications.length < 100
+                              ? messageNotifications.length
+                              : "99+"}
                           </div>
                         )}
                     </div>

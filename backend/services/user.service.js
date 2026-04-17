@@ -40,10 +40,10 @@ export const follow = async (data) => {
     throw new Error("Empty data");
   const user = await findUserById(authUserId);
   const toFollowUser = await findUserById(followerId);
-  const followedFromCache = await redis.get("followers-" + followerId);
-  const followingFromCache = await redis.get("following-" + authUserId);
-  if (followingFromCache) await redis.del("following-" + authUserId);
-  if (followedFromCache) await redis.del("followers-" + followerId);
+  // const followedFromCache = await redis.get("followers-" + followerId);
+  // const followingFromCache = await redis.get("following-" + authUserId);
+  // if (followingFromCache) await redis.del("following-" + authUserId);
+  // if (followedFromCache) await redis.del("followers-" + followerId);
   if (!user || !toFollowUser) throw new Error("User not found");
 
   const followData = { authUserId, followerId };
@@ -71,10 +71,10 @@ export const unfollow = async (data) => {
   const { authUserId, unfollowerId } = data;
   const user = await findUserById(authUserId);
   const unfollowUser = await findUserById(unfollowerId);
-  const followedFromCache = await redis.get("followers-" + unfollowerId);
-  const followingFromCache = await redis.get("following-" + authUserId);
-  if (followingFromCache) await redis.del("following-" + authUserId);
-  if (followedFromCache) await redis.del("followers-" + unfollowerId);
+  // const followedFromCache = await redis.get("followers-" + unfollowerId);
+  // const followingFromCache = await redis.get("following-" + authUserId);
+  // if (followingFromCache) await redis.del("following-" + authUserId);
+  // if (followedFromCache) await redis.del("followers-" + unfollowerId);
   if (!user || !unfollowUser) throw new Error("User not found");
 
   const alreadyFollowing = await findFollow(data);

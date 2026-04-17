@@ -4,14 +4,27 @@ import { useGetPostComments } from "../queryAndMutation/queries/comments-queries
 import { useParams } from "react-router-dom";
 import Comment from "./Comment";
 import CommentInput from "./CommentInput";
+import ProfileSkelet from "../skeletons/ProfileSkelet";
+import { useAuthStore } from "../store/authStore";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 const CommentsContainer = () => {
   const { id: postId } = useParams();
   const { data: comments, isPending: isPendingComments } =
     useGetPostComments(postId);
-
+  const { socket } = useAuthStore();
   console.log("ALL THE COMMENTS : ", comments);
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    socket.on("newComment", (comment) => {
+      console.log("New comment received:", comment);
+      queryClient.invalidateQueries(["comment", postId]);
+    });
+  }, [socket, queryClient, postId]);
+
   const [showComments, setShowComments] = useState(true);
-  if (isPendingComments) return <p>Loading...</p>;
+  if (isPendingComments) return <ProfileSkelet />;
+
   return (
     <section>
       <button onClick={() => setShowComments((prev) => !prev)}>Comments</button>

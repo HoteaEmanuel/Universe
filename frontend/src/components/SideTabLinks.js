@@ -19,6 +19,7 @@ export const SideLinks = [
   {
     link: "/chat",
     text: "Chat",
+    notification:true,
     element: IoChatboxEllipses,
   },
   {

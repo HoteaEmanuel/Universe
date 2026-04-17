@@ -10,7 +10,7 @@ import {
   findMessageById,
 } from "../repository/message.repository.js";
 import { v2 as cloudinary } from "cloudinary";
-import { io } from "../lib/socket.js";
+import { getActiveConversationUsers, io } from "../lib/socket.js";
 export const createGroupService = async (data) => {
   const { name, description, userId } = data;
   const groupData = { name, description };
@@ -66,12 +66,25 @@ export const sendMessage = async (data) => {
   if (!members) {
     return;
   }
+  // Send the message to all group members
   members.forEach((member) => {
     io.to(getReceiverSocketId(member.memberId.toString())).emit(
       "newGroupMessage",
       message,
     );
   });
+
+  const activeConversationUsers=getActiveConversationUsers(groupId);
+
+    // const notifData = {
+    //     actionUserId: authUserId,
+    //     userId: userId,
+    //     title:"New message",
+    //     type:"message",
+    //     message: `${user?.firstName || user?.name}: ${message?.content ? message.content : 'IMAGE'}`,
+    //     groupId:groupId
+    //   };
+    // const notification=await createMessageNotification(notifData);
   return groupMessage;
 };
 

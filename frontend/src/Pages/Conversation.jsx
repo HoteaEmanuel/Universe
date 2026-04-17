@@ -11,12 +11,14 @@ import { useAuthStore } from "../store/authStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { urlPathName } from "../utils/urlPathFromName";
 import { SlOptionsVertical } from "react-icons/sl";
+import { useSeeNewMessages } from "../queryAndMutation/mutations/notification-mutation";
 const Conversation = () => {
   const { id: convoId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { socket } = useAuthStore();
+  const { user: authUser, socket } = useAuthStore();
   const { data: user, isPending: isPendingUser } = useGetUserByConvoId(convoId);
+  const { mutate: seeNewMessages } = useSeeNewMessages(authUser._id, convoId);
   const { data: messages, isPending: isPendingMessages } =
     useGetConvoMessages(convoId);
   useEffect(() => {
@@ -26,9 +28,19 @@ const Conversation = () => {
     });
   }, [socket, queryClient, convoId]);
 
+  useEffect(() => {
+    socket.emit("view_conversation", convoId, authUser._id);
+
+    seeNewMessages();
+
+    return ()=>{
+      socket.emit("leave_conversation",convoId,authUser._id);
+    }
+  }, [seeNewMessages, socket, authUser, convoId]);
+
   const fullName = urlPathName(user);
   if (isPendingUser || isPendingMessages) return <p>Loading...</p>;
-
+  console.log(messages);
   return (
     <section className="w-full overflow-y-hidden">
       <div className="flex justify-center items-center gap-1 w-full p-2 md:p-5">

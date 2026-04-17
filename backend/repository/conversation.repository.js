@@ -5,18 +5,18 @@ export const findConversationByParticipants = async (
   authUserId,
   otherUserId,
 ) => {
+  console.log("HE")
   const conversation = await Conversation.findOne({
     participants: [authUserId, otherUserId] || [otherUserId, authUserId],
   });
-
+  console.log("CONVERSATION FOUND : " , conversation);
   return conversation;
 };
 
 export const createConversation = async (data) => {
-  const { authUserId, otherUserId, messageData } = data;
+  const { authUserId, otherUserId } = data;
   const conversation = await Conversation.create({
     participants: [authUserId, otherUserId],
-    lastMessage: messageData,
     updatedAt: Date.now(),
   });
 

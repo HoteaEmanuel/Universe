@@ -11,11 +11,10 @@ import {
 export const getComments = async (req, res) => {
   try {
     const postId = req.params.id;
-    console.log("COMMENTS", postId);
     const comments = await Comment.find({ postId: postId });
     const commentsWithLikes = await Promise.all(
       comments.map(async (comment) => {
-        const isLiked = await CommentLikesModel.findOne({
+        const isLiked = await CommentLike.findOne({
           commentId: comment._id,
           likedBy: req.userId,
         });
@@ -75,6 +74,7 @@ export const sendCommentController = async (req, res) => {
     await createComment(data);
     // Add comment real time func
     // io.emit("newComment",comment);
+    console.log("COMMENT SEND");
     return res.status(201).json({ message: "Succes" });
   } catch (error) {
     return res.status(400).json({ error: error });

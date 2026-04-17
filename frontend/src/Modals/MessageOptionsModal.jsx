@@ -5,14 +5,11 @@ import { useState } from "react";
 import EditMessageModal from "./EditMessageModal";
 import { useDeleteMessageInGroupMutation } from "../queryAndMutation/mutations/group-mutation";
 const MessageOptionsModal = ({ open, onClose, message }) => {
-  console.log("Message ID in modal: " + message?._id);
   const deleteMessageMutation = useDeleteMessageMutation(message?._id);
   const deleteMessageInGroupMutation = useDeleteMessageInGroupMutation(
     message?._id,
   );
   const [showEditMessage, setShowEditMessage] = useState(false);
-  console.log("MESSAGE MODAL: ");
-  console.log(message);
   return (
     <div
       className={`fixed inset-0 flex w-full h-full justify-center items-center ${
@@ -43,7 +40,6 @@ const MessageOptionsModal = ({ open, onClose, message }) => {
             className="p-2 hoverGray rounded-md cursor-pointer"
             onClick={async (e) => {
               e.stopPropagation();
-              console.log("BUNA: ", message);
               if (message?.conversationId) {
                 await deleteMessageMutation.mutate(message?._id);
               } else {

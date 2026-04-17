@@ -11,9 +11,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MessageOptionsModal from "../Modals/MessageOptionsModal";
 import { urlPathName } from "../utils/urlPathFromName";
+import { FaAngleDown } from "react-icons/fa";
 
 import { RiArrowDropDownLine } from "react-icons/ri";
-const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const GroupConversationLayout = ({ group, messages }) => {
   const { user } = useAuthStore();
   // const { messages, getLiveMessages, getMessages } = useConversationStore();
@@ -25,15 +25,36 @@ const GroupConversationLayout = ({ group, messages }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [openAddedImages, setOpenAddedImages] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(null);
+  const containerRef = useRef();
   useEffect(() => {
     if (messageEnd.current && messages) {
       messageEnd.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+  const handleScrollDown = () => {
+    console.log("SCROLL DOWN");
+    messageEnd?.current.scrollIntoView({ behavior: "smooth" });
+  };
+  useEffect(() => {
+    const el = containerRef.current;
+    const handleScroll = () => {
+      console.log("SCROLL");
+      const distanceFromBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight;
+      setShowScrollBtn(distanceFromBottom > 500);
+    };
+
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
   console.log(messages);
   return (
     <div className=" max-h-[60%] md:h-[80%] relative overflow-y-auto p-1">
-      <div className="w-full h-[70vh] sm:h-[75vh] overflow-y-auto conversationContainer rounded-2xl p-2 my-1">
+      <div
+        className="w-full h-[70vh] sm:h-[75vh] overflow-y-auto conversationContainer rounded-2xl p-2 my-1"
+        ref={containerRef}
+      >
         <h1 className="text-center opacity-70 text-xs">
           Group created at {formatToLocalDate(group.createdAt)}{" "}
         </h1>
@@ -47,7 +68,6 @@ const GroupConversationLayout = ({ group, messages }) => {
                     ? "justify-end"
                     : "justify-start"
                 }`}
-                ref={messageEnd}
                 onClick={() => {
                   console.log("ON CLICK:");
                   console.log(message.senderId);
@@ -178,6 +198,7 @@ const GroupConversationLayout = ({ group, messages }) => {
           ) : (
             <h1 className="text-center">No messages yet!</h1>
           )}
+          <div ref={messageEnd} />
         </ul>
       </div>
       {selectedMessage && (
@@ -240,6 +261,15 @@ const GroupConversationLayout = ({ group, messages }) => {
             </li>
           ))}
         </ul>
+      )}
+
+      {showScrollBtn && (
+        <div className="absolute top-9/10 right-5">
+          <FaAngleDown
+            className="size-8 icon-with-bg"
+            onClick={handleScrollDown}
+          />
+        </div>
       )}
       <div className="fixed bottom-20 sm:bottom-0 w-[90vw] md:w-[70vw]">
         <MessageInput

@@ -39,7 +39,7 @@ const Comment = ({ comment }) => {
           {authUser._id === user._id
             ? "You"
             : `${user.firstName || user.name} ${user?.lastName}`}{" "}
-          -{" "}
+          ~ {" "}
           <span className="text-[9px]">
             {formatDateDetailed(comment.createdAt)}
             {/* {comment.createdAt} */}

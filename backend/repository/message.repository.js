@@ -7,17 +7,20 @@ export const createMessage = async (data) => {
     senderId,
     receiverId,
     content,
-    imageUrls,
     imagePublicIds,
+    imageUrls
   } = data;
+  console.log("MESSAGE CREATION");
+  console.log(conversationId,senderId,receiverId,content);
   const message = await Message.create({
     conversationId,
     senderId,
     receiverId,
-    content: content || null,
     imageUrls,
     imagePublicIds,
+    content: content || null,
   });
+  console.log("MESS : ",message);
   return message;
 };
 

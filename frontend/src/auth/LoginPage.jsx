@@ -30,7 +30,10 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm();
   const onSubmit = async (data) => {
-    await logIn(data.email, data.password);
+    const response=await logIn(data.email, data.password);
+    console.log(error);
+    if(error==="Rate limit exceeded") 
+      toast.error("Too many requests")
   };
   const [googleError, setGoogleError] = useState(null);
   useEffect(() => {

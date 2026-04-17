@@ -9,8 +9,22 @@ const io = new Server(server, {
   },
 });
 const usersSocket = {};
+
+const activePostUsers={};
+
+const activeConversationUsers={};
+
 export function getReceiverSocketId(userId) {
   return usersSocket[userId];
+}
+
+export const getActivePostUsers=(postId)=>{
+  console.log(postId);
+  return activePostUsers[postId];
+}
+
+export const getActiveConversationUsers=(convoId)=>{
+  return activeConversationUsers[convoId];
 }
 io.on("connection", (socket) => {
   console.log("A user connected " + socket.id);
@@ -19,6 +33,45 @@ io.on("connection", (socket) => {
   if (userId) {
     usersSocket[userId] = socket.id;
   }
+
+  socket.on("view_post",(postId)=>{
+    console.log("NEW USER ON THE POST");
+    if(!activePostUsers[postId]) {
+      activePostUsers[postId]=new Set();
+      activePostUsers[postId].add(postId);
+
+    }
+    else activePostUsers[postId].add(userId);
+    console.log("ACTIVE USERS FOR POST ID : " ,postId);
+    console.log(activePostUsers[postId]);
+  });
+
+  socket.on("leave_post",(postId)=>{
+    console.log("LEFT POST");
+    activePostUsers[postId]?.delete(userId);
+  })
+
+
+
+  socket.on("view_conversation",(id,userId)=>{
+    if(!activeConversationUsers[id])
+    {
+      activeConversationUsers[id]=new Set();
+      activeConversationUsers[id].add(userId)
+    }
+    else activeConversationUsers[id].add(userId);
+    console.log("ACTIVE USERS ON CONVERSATION\n");
+    console.log(activeConversationUsers[id]);
+  })
+
+  socket.on("leave_conversation",(id,userId)=>{
+    if(!activeConversationUsers[id]) return;
+    activeConversationUsers[id].delete(userId);
+
+      console.log("ACTIVE USERS ON CONVERSATION\n");
+      console.log(activeConversationUsers[id]);
+  })
+
   io.emit("getOnlineUsers", Object.keys(usersSocket));
   socket.on("disconnect", () => {
     console.log("A user disconnected " + socket.id);

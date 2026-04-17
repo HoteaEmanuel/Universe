@@ -9,6 +9,7 @@ axios.defaults.withCredentials = true;
 export const useConversationStore = create((set) => ({
   isLoading: false,
   messages: [],
+  error:undefined,
   getConvoById: async (id) => {
     set({ isLoading: false });
     try {
@@ -86,7 +87,8 @@ export const useConversationStore = create((set) => ({
           message,
         },
       );
-      return response.data;
+      console.log(response.data.id);  
+      return response.data.id;
     } catch (error) {
       throw new Error(error);
     } finally {
@@ -104,9 +106,12 @@ export const useConversationStore = create((set) => ({
           headers: { "Content-Type": "multipart/form-data" },
         },
       );
+
+      set({error:null});
       return response.data;
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      set({error:error?.response?.data?.message});
     } finally {
       set({ isLoading: false });
     }

@@ -223,4 +223,17 @@ export const useGroupStore = create((set) => ({
       set({ isLoading: false });
     }
   },
+
+  getActiveMembers:async (id)=>{
+    try{
+      const response=await axios.get(`${API_URL}/groups/active-users/${id}`);
+      console.log("ACTIVE MEMBERS: ")
+      console.log(response);
+      return response.data.activeUsers;
+    }
+    catch(error){
+      throw new Error(error);
+    }
+
+  }
 }));

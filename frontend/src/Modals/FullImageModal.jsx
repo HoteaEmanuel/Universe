@@ -7,7 +7,7 @@ const FullImageModal = ({ image, open, onClose }) => {
   return (
     <div
       className={`fixed inset-0 flex w-full h-full justify-center items-center z-10 ${
-        open ? "visible bg-black/10" : "invisible"
+        open ? "visible bg-black/50" : "invisible"
       }`}
       onClick={onClose}
     >
